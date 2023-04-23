@@ -16,7 +16,7 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
-bot = telebot.TeleBot("")  # SET!!!!
+bot = telebot.TeleBot("")  # SET TOKEN!!!!
 
 
 @bot.message_handler(commands=['start'])
@@ -30,6 +30,13 @@ def send_welcome(message):
 
     bot.reply_to(message, f"Здравствуй, {message.from_user.first_name}\nВыбери, что делать дальше",
                  parse_mode='html', reply_markup=markup)
+
+
+@bot.message_handler(content_types=['text'])
+def get_text_messages(message):
+    chat_id = message.chat.id
+    if message.text.lower() == 'привет':
+        bot.send_message(chat_id, "Если ты админ, скажи Да")
 
 
 @bot.message_handler(content_types=['document'])
