@@ -16,7 +16,7 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
-bot = telebot.TeleBot("5381457712:AAEKgz0iFkMj58ejsvcTcfDxjhuFB7Ftqv0")
+bot = telebot.TeleBot("")  # SET!!!!
 
 
 @bot.message_handler(commands=['start'])
@@ -28,7 +28,7 @@ def send_welcome(message):
     but4 = types.KeyboardButton("Закончить")
     markup.add(but1, but2, but3, but4)
 
-    bot.reply_to(message, "Здравствуй, {0.first_name}\nВыбери что делать дальше".format(message.from_user),
+    bot.reply_to(message, f"Здравствуй, {message.from_user.first_name}\nВыбери, что делать дальше",
                  parse_mode='html', reply_markup=markup)
 
 
@@ -51,7 +51,6 @@ def handle_docs_photo(message):
 
 @bot.message_handler(func=lambda message: True)
 def handle_docs(message):
-    global path, Struct1, Struct2, Matrix, GEN_DEFICIT, Profiles, total_Profiles, total_Pairs, sorted_Struct, Raspr_arr
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     but1 = types.KeyboardButton("Добавление файлов")
     but2 = types.KeyboardButton("Таблица распределения")
@@ -71,23 +70,7 @@ def handle_docs(message):
 
         elif message.text == "Таблица распределения":
             chat_id = message.chat.id
-
-            Struct1, Struct2, Matrix, GEN_DEFICIT, Profiles, total_Profiles, total_Pairs, IDs = Obrabotka()
-
-            Struct1[-1] = "!Nobody!"
-            Struct2[-1] = [0, False, 0, {}, []]
-
-            Raspr_arr = set()
-            sorted_Struct = sorted([[k, sp] for k, sp in Struct2.items()], key=lambda x: -len(x[1][3].keys()))
-
-            Struct_output, Not_Distributed = mainDistribution_v02()
-
-            bot.send_message(message.chat.id, Output(Struct_output, Not_Distributed, Struct1))
-
-            global path
-            doc = open(path + 'Outputs/results.xls', 'rb')
-
-            bot.send_document(chat_id, doc)
+            # bot.send_document(chat_id, doc)
 
         elif message.text == "Статистика для человека":
             chat_id = message.chat.id
@@ -98,23 +81,9 @@ def handle_docs(message):
             name = message.text
 
             chat_id = message.chat.id
-
-            Struct1, Struct2, Matrix, GEN_DEFICIT, Profiles, total_Profiles, total_Pairs, IDs = Obrabotka()
-
-            Struct1[-1] = "!Nobody!"
-            Struct2[-1] = [0, False, 0, {}, []]
-
-            Raspr_arr = set()
-            sorted_Struct = sorted([[k, sp] for k, sp in Struct2.items()], key=lambda x: -len(x[1][3].keys()))
-
-            try:
-                id_p = IDs[name.rstrip()]
-            except Exception:
-                bot.send_message(chat_id, f"Человек не найден")
-                flag_stat = False
-                return 0
-            bot.send_message(chat_id, person_Stat(id_p))
+            # bot.send_message(chat_id, person_Stat(id_p))
             flag_stat = False
+
         elif message.text == "Закончить":
             shutil.rmtree(path + "Inputs")
             shutil.rmtree(path + "Outputs")
@@ -122,6 +91,7 @@ def handle_docs(message):
             os.mkdir(path + "Inputs")
             os.mkdir(path + "Outputs")
             bot.send_message(message.chat.id, "Хорошо, все файлы удалены\nДо новых встреч")
+
         else:
             bot.send_message(message.chat.id, "Я не знаю что и ответить")
 
