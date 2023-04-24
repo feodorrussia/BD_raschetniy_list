@@ -1,8 +1,8 @@
-
 import logging
 from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
 from aiogram.utils import executor
+from config_reader import config
 
 from sqlalchemy.orm import sessionmaker
 import datetime
@@ -16,7 +16,7 @@ session = DBSession()
 
 
 logging.basicConfig(level=logging.INFO)
-bot = Bot(token="6218189424:AAF4Upm5NsSzYh37T-UCUggbuGwSO5evPG8")
+bot = Bot(token=config.bot_token.get_secret_value())  # безопашношть
 dp = Dispatcher(bot)
 
 
