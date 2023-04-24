@@ -151,7 +151,7 @@ class Award(Basic):
         return f"{self.type} sum:{self.sum}{'; description: ' + self.descr if self.descr is not None or self.descr != '' else ''}"
 
 
-# if I'll got a free time in the future
+# if I'll get a free time in the future
 # class Transaction(Basic):
 #     __tablename__ = 'operations of transactions'
 #
@@ -162,6 +162,6 @@ class Award(Basic):
 #     # last - bool
 
 
-engine = create_engine('sqlite:///database.db')
+engine = create_engine('sqlite:///data/database.db')
 
 Base.metadata.create_all(engine)

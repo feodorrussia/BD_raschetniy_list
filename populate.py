@@ -1,7 +1,5 @@
-from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-import datetime
-from DataBase_setup import *
+from data.DataBase_setup import *
 
 engine = create_engine('sqlite:///database.db')
 Base.metadata.bind = engine
