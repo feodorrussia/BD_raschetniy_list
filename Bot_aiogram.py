@@ -10,7 +10,7 @@ from handlers import client, admin
 from sqlalchemy.orm import sessionmaker
 from data.DataBase_setup import *
 
-engine = create_engine('sqlite:///database.db')
+engine = create_engine('sqlite:///data/database.db')
 Base.metadata.bind = engine
 
 DBSession = sessionmaker(bind=engine)
