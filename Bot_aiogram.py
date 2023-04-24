@@ -1,12 +1,14 @@
 import logging
-from aiogram import Bot, types
+from aiogram import Bot
 from aiogram.dispatcher import Dispatcher
 from aiogram.utils import executor
-from config_reader import config
+from other.config_reader import config
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
+
+from handlers import client, admin
 
 from sqlalchemy.orm import sessionmaker
-import datetime
-from DataBase_setup import *
+from data.DataBase_setup import *
 
 engine = create_engine('sqlite:///database.db')
 Base.metadata.bind = engine
@@ -14,25 +16,13 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
-
+storage = MemoryStorage()
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=config.bot_token.get_secret_value())  # безопашношть
-dp = Dispatcher(bot)
+dp = Dispatcher(bot, storage=storage)
 
-
-@dp.message_handler(commands=['start'])
-async def process_start_command(message: types.Message):
-    await message.reply("Привет!\nНапиши мне что-нибудь!")
-
-
-@dp.message_handler(commands=['help'])
-async def process_help_command(message: types.Message):
-    await message.reply("Напиши мне что-нибудь, и я отпрпавлю этот текст тебе в ответ!")
-
-
-@dp.message_handler()
-async def echo_message(msg: types.Message):
-    await bot.send_message(msg.from_user.id, msg.text)
+client.register_handlers_client(dp)
+admin.register_handlers_admin(dp)
 
 
 if __name__ == '__main__':
