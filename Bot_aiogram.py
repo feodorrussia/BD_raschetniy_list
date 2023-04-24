@@ -4,6 +4,17 @@ from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
 from aiogram.utils import executor
 
+from sqlalchemy.orm import sessionmaker
+import datetime
+from DataBase_setup import *
+
+engine = create_engine('sqlite:///database.db')
+Base.metadata.bind = engine
+
+DBSession = sessionmaker(bind=engine)
+session = DBSession()
+
+
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token="6218189424:AAF4Upm5NsSzYh37T-UCUggbuGwSO5evPG8")
 dp = Dispatcher(bot)
