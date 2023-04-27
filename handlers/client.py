@@ -1,21 +1,43 @@
-from aiogram import types, Dispatcher
+from aiogram import Dispatcher
 from create_bot import bot
 from keyboards.keyboards import *
+from aiogram.dispatcher import FSMContext
+from aiogram.dispatcher.filters import Text
+from states.AdminStatus import AdminStatus
 
 
 # @dp.message_handler(commands=['start'])
 async def process_start_command(message: types.Message):
-    await message.reply(f"Здравствуй, {message.from_user.first_name}\n(Будь паинькой, скажи привет)",
-                       reply_markup=kb_hello)
+    await AdminStatus.unauthorized.set()
+    await message.reply(f"Здравствуй, {message.from_user.first_name}\n(Будь паинькой, скажи привет)")
 
 
-# @dp.message_handler(commands=['Admin'])
-async def process_authorize_command(message: types.Message):
+# @dp.message_handler()
+async def echo(message: types.Message):
     chat_id = message.chat.id
+    await bot.send_message(chat_id, message.text)
 
-    await bot.send_message(chat_id, "Если ты админ, скажи Да")
+
+
+async def authorizing_handler(message: types.Message, state : FSMContext):
+    chat_id = message.chat.id
+    await AdminStatus.authorizing.set()
+    await bot.send_message(chat_id, "Если ты админ, скажи да (именно так)")
+
+
+async def authorization_handler(message: types.Message, state: FSMContext):
+    chat_id = message.chat.id
+    if hash(message.text) == hash("да"):
+        await AdminStatus.authorized.set()
+        await bot.send_message(chat_id, "Здравствуйте, Барин. Чего изволите?", reply_markup=kb_admin_def)
+    else:
+        await bot.send_message(chat_id, "Неверный ответ, сударь. Извольте ещё раз.")
+
 
 
 def register_handlers_client(dp: Dispatcher):
     dp.register_message_handler(process_start_command, commands=['start'])
-    dp.register_message_handler(process_authorize_command, commands=['Admin'])
+    dp.register_message_handler(authorizing_handler, state=AdminStatus.unauthorized, commands=['admin'])
+    dp.register_message_handler(authorizing_handler, Text(equals="войти", ignore_case=True), state=AdminStatus.unauthorized)
+    dp.register_message_handler(authorization_handler, state=AdminStatus.authorizing)
+    dp.register_message_handler(echo, state=AdminStatus.unauthorized)
