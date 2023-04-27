@@ -6,11 +6,45 @@ but_hello = types.KeyboardButton("Привет!")
 kb_hello.add(but_hello)
 
 kb_admin_def = types.InlineKeyboardMarkup(row_width=2, resize_keyboard=True)
-buttons = [types.InlineKeyboardButton(text="Добавление/назначение", callback_data="add_default"),
+buttons_1 = [types.InlineKeyboardButton(text="Добавление/назначение", callback_data="add_default"),
            types.InlineKeyboardButton(text="Изменение", callback_data="upd_default"),
            types.InlineKeyboardButton(text="Увольнение/удаление", callback_data="del_default"),
            types.InlineKeyboardButton(text="Генерация", callback_data="gen_default")]
-kb_admin_def.add(*buttons)
+kb_admin_def.add(*buttons_1)
+
+kb_add_def = types.InlineKeyboardMarkup(row_width=2, resize_keyboard=True)
+buttons_2 = [types.InlineKeyboardButton(text="Сотрудник", callback_data="add_employee"),
+           types.InlineKeyboardButton(text="Ребёнок сотрудника", callback_data="add_child"),
+           types.InlineKeyboardButton(text="Контракт", callback_data="add_contract"),
+           types.InlineKeyboardButton(text="Новая должность", callback_data="add_position"),
+           types.InlineKeyboardButton(text="Новое поощрение/штраф", callback_data="add_award"),
+           types.InlineKeyboardButton(text="Поощрение/штраф сотруднику", callback_data="add_award_to_employee")]
+kb_add_def.add(*buttons_2)
+
+kb_del_def = types.InlineKeyboardMarkup(row_width=2, resize_keyboard=True)
+buttons_3 = [types.InlineKeyboardButton(text="Сотрудник", callback_data="del_employee"),
+            types.InlineKeyboardButton(text="Контракт", callback_data="del_cantract"),
+            types.InlineKeyboardButton(text="Ребёнок", callback_data="del_child"),
+            types.InlineKeyboardButton(text="Поощрение/штраф", callback_data="del_award"),
+            types.InlineKeyboardButton(text="Должность", callback_data="del_position")]
+kb_del_def.add(*buttons_3)
+
+kb_gen_def = types.InlineKeyboardMarkup(row_width=1, resize_keyboard=True)
+buttons_4 = [types.InlineKeyboardButton(text="Список вакансий", callback_data="gen_vacancy"),
+            types.InlineKeyboardButton(text="Расчётный лист сотрудника", callback_data="gen_employee_profit"),
+            types.InlineKeyboardButton(text="Письмо предупреждения", callback_data="gen_warning"),
+            types.InlineKeyboardButton(text="Годовой доход всех сотрудников", callback_data="gen_profit")]
+kb_gen_def.add(*buttons_4)
+
+kb_upd_def = types.InlineKeyboardMarkup(row_width=1, resize_keyboard=True)
+buttons_5 = [types.InlineKeyboardButton(text="Сотрудник", callback_data="edit_employee"),
+            types.InlineKeyboardButton(text="Ребёнок", callback_data="edit_child"),
+            types.InlineKeyboardButton(text="Ставка сотрудника", callback_data="edit_rate"),
+            types.InlineKeyboardButton(text="Контракт", callback_data="edit_cantract"),
+            types.InlineKeyboardButton(text="Должность", callback_data="edit_position"),
+            types.InlineKeyboardButton(text="Поощрение/штраф", callback_data="edit_award"),
+            types.InlineKeyboardButton(text="Поощрения/штрафы сотрудника", callback_data="edit_award_employee")]
+kb_upd_def.add(*buttons_5)
 
 kb_cancel = types.ReplyKeyboardMarkup(resize_keyboard=True)
 but_cancel = types.KeyboardButton("Отмена")
