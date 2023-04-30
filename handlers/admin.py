@@ -61,7 +61,7 @@ async def cancel_handler(message : types.Message, state : FSMContext):
         await message.reply("Как скажете, Барин.\nАвторизоваться снова - /admin", reply_markup=types.ReplyKeyboardRemove())
         return
     await AdminStatus.authorized.set()
-    await message.reply("Как скажете, Барин.\nМеню - /start_menu", reply_markup=types.ReplyKeyboardRemove())
+    await message.reply("Как скажете, Барин.\nМеню - /start_menu\nВыйти - /exit", reply_markup=types.ReplyKeyboardRemove())
 
 
 async def exit_handler(message : types.Message, state : FSMContext):

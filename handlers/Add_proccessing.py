@@ -88,7 +88,7 @@ async def birthday_child_handler(message: types.Message, state: FSMContext):
                            "\nМеню добавления - /add_menu" +
                            "\nМеню удаления - /del_menu" +
                            "\nМеню изменения - /upd_menu" +
-                           "\nМеню запросов - /gen_menu", reply_markup=kb_continue)
+                           "\nМеню запросов - /gen_menu\n\nВыйти - /exit", reply_markup=kb_continue)
 
 
 async def add_contract_handler(call: types.CallbackQuery, state: FSMContext):
@@ -145,7 +145,7 @@ async def end_contract_date_handler(message: types.Message, state: FSMContext):
                            "\nМеню добавления - /add_menu" +
                            "\nМеню удаления - /del_menu" +
                            "\nМеню изменения - /upd_menu" +
-                           "\nМеню запросов - /gen_menu", reply_markup=kb_continue)
+                           "\nМеню запросов - /gen_menu\n\nВыйти - /exit", reply_markup=kb_continue)
 
 
 async def add_position_handler(call: types.CallbackQuery, state: FSMContext):
@@ -191,7 +191,7 @@ async def number_stuff_position_handler(message: types.Message, state: FSMContex
                            "\nМеню добавления - /add_menu" +
                            "\nМеню удаления - /del_menu" +
                            "\nМеню изменения - /upd_menu" +
-                           "\nМеню запросов - /gen_menu", reply_markup=kb_continue)
+                           "\nМеню запросов - /gen_menu\n\nВыйти - /exit", reply_markup=kb_continue)
 
 
 async def add_award_handler(call: types.CallbackQuery, state: FSMContext):
@@ -284,7 +284,7 @@ async def date_award_handler(message: types.Message, state: FSMContext):
                            "\nМеню добавления - /add_menu" +
                            "\nМеню удаления - /del_menu" +
                            "\nМеню изменения - /upd_menu" +
-                           "\nМеню запросов - /gen_menu", reply_markup=kb_continue)
+                           "\nМеню запросов - /gen_menu\n\nВыйти - /exit", reply_markup=kb_continue)
 
 
 def register_handlers_delete(dp: Dispatcher):

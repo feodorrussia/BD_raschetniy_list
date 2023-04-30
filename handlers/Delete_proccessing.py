@@ -36,7 +36,7 @@ async def date_fire_handler(message: types.Message, state : FSMContext):
                            "\nМеню добавления - /add_menu" +
                            "\nМеню удаления - /del_menu" +
                            "\nМеню изменения - /upd_menu" +
-                           "\nМеню запросов - /gen_menu", reply_markup=kb_continue)
+                           "\nМеню запросов - /gen_menu\n\nВыйти - /exit", reply_markup=kb_continue)
 
 
 async def end_contract_handler(call: types.CallbackQuery, state : FSMContext):
