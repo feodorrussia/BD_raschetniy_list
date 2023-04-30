@@ -23,6 +23,8 @@ class AddPosition(StatesGroup):
 
 class AddAward(StatesGroup):
     type = State()
+    descr = State()
+    cost = State()
 
 class AddAwardToEmployee(StatesGroup):
     name_employee = State()

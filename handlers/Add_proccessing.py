@@ -182,6 +182,38 @@ async def add_award_handler(call: types.CallbackQuery, state : FSMContext):
     await call.answer()
 
 
+async def type_award_handler(message: types.Message, state : FSMContext):
+    chat_id = message.chat.id
+    # await remove_chat_buttons(chat_id)
+
+    await AddAward.next()
+
+    await bot.send_message(chat_id, "Введите зарплату сотрудника на этой должности", reply_markup=types.ReplyKeyboardRemove())
+
+
+async def description_award_handler(message: types.Message, state : FSMContext):
+    chat_id = message.chat.id
+    # await remove_chat_buttons(chat_id)
+
+    await AddAward.next()
+
+    await bot.send_message(chat_id, "Введите количество человек, необходимых на этой должности (количество полных ставок)", reply_markup=types.ReplyKeyboardRemove())
+
+
+async def award_cost_handler(message: types.Message, state : FSMContext):
+    chat_id = message.chat.id
+    # await remove_chat_buttons(chat_id)
+
+    kb_continue = types.InlineKeyboardMarkup(resize_keyboard=True)
+    butts = types.InlineKeyboardButton(text="Продолжить", callback_data="add_position")
+    kb_continue.add(butts)
+
+    await state.finish()
+    await AdminStatus.authorized.set()
+
+    await bot.send_message(chat_id, "Принято. Хотите добавить ещё одну должность?\nМеню - /start_menu", reply_markup=kb_continue)
+
+
 async def add_award_to_employee_handler(call: types.CallbackQuery, state : FSMContext):
     # await remove_chat_buttons(chat_id)
     await AddAwardToEmployee.name_employee.set()
@@ -212,6 +244,9 @@ def register_handlers_add(dp : Dispatcher):
     dp.register_message_handler(number_stuff_position_handler, state=AddPosition.num_stuff)
 
     dp.register_callback_query_handler(add_award_handler, lambda call: call.data == "add_award", state=AdminStatus.authorized)
+    dp.register_message_handler(type_award_handler, state=AddAward.type)
+    dp.register_message_handler(description_award_handler, state=AddAward.descr)
+    dp.register_message_handler(award_cost_handler, state=AddAward.cost)
 
     dp.register_callback_query_handler(add_award_to_employee_handler, lambda call: call.data == "add_award_to_employee", state=AdminStatus.authorized)
 
