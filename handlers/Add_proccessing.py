@@ -190,7 +190,7 @@ async def add_award_to_employee_handler(call: types.CallbackQuery, state : FSMCo
 
 
 def register_handlers_add(dp : Dispatcher):
-    dp.register_callback_query_handler(add_employee_handler, lambda call: call.data == "add_employee", state="*")
+    dp.register_callback_query_handler(add_employee_handler, lambda call: call.data == "add_employee", state=AdminStatus.authorized)
     dp.register_message_handler(name_employee_handler, state=AddEmployee.name)
     dp.register_message_handler(date_hire_employee_handler, state=AddEmployee.date_hire)
     dp.register_message_handler(gender_employee_handler, state=AddEmployee.gender)
