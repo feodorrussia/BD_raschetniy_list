@@ -211,14 +211,46 @@ async def award_cost_handler(message: types.Message, state : FSMContext):
     await state.finish()
     await AdminStatus.authorized.set()
 
-    await bot.send_message(chat_id, "Принято. Хотите добавить ещё одно поощрение/должность?\nМеню - /start_menu", reply_markup=kb_continue)
+    await bot.send_message(chat_id, "Принято. Хотите добавить ещё одно поощрение/штраф?\nМеню - /start_menu", reply_markup=kb_continue)
 
 
 async def add_award_to_employee_handler(call: types.CallbackQuery, state : FSMContext):
     # await remove_chat_buttons(chat_id)
     await AddAwardToEmployee.name_employee.set()
-    await call.message.answer("Введите ФИО сотрудника", reply_markup=types.ReplyKeyboardRemove())
+    await call.message.answer(f"Введите ФИО сотрудника\n{'список сотрудников'}", reply_markup=types.ReplyKeyboardRemove())
     await call.answer()
+
+
+async def name_employee_to_award_handler(message: types.Message, state : FSMContext):
+    chat_id = message.chat.id
+    # await remove_chat_buttons(chat_id)
+
+    await AddAward.next()
+
+    await bot.send_message(chat_id, f"Введите название поощрения/штрафа\n{'список поощрений/штрафов'}", reply_markup=types.ReplyKeyboardRemove())
+
+
+async def name_award_handler(message: types.Message, state : FSMContext):
+    chat_id = message.chat.id
+    # await remove_chat_buttons(chat_id)
+
+    await AddAward.next()
+
+    await bot.send_message(chat_id, "Введите дату назначения поощрения/штрафа", reply_markup=types.ReplyKeyboardRemove())
+
+
+async def date_award_handler(message: types.Message, state : FSMContext):
+    chat_id = message.chat.id
+    # await remove_chat_buttons(chat_id)
+
+    kb_continue = types.InlineKeyboardMarkup(resize_keyboard=True)
+    butts = types.InlineKeyboardButton(text="Продолжить", callback_data="add_position")
+    kb_continue.add(butts)
+
+    await state.finish()
+    await AdminStatus.authorized.set()
+
+    await bot.send_message(chat_id, "Принято. Хотите назначить ещё одно поощрение/штраф сотруднику?\nМеню - /start_menu", reply_markup=kb_continue)
 
 
 def register_handlers_add(dp : Dispatcher):
@@ -249,4 +281,7 @@ def register_handlers_add(dp : Dispatcher):
     dp.register_message_handler(award_cost_handler, state=AddAward.cost)
 
     dp.register_callback_query_handler(add_award_to_employee_handler, lambda call: call.data == "add_award_to_employee", state=AdminStatus.authorized)
+    dp.register_message_handler(name_employee_to_award_handler, state=AddAwardToEmployee.name_employee)
+    dp.register_message_handler(name_award_handler, state=AddAwardToEmployee.name_award)
+    dp.register_message_handler(date_award_handler, state=AddAwardToEmployee.date)
 

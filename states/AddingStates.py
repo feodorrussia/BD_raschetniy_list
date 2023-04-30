@@ -28,3 +28,5 @@ class AddAward(StatesGroup):
 
 class AddAwardToEmployee(StatesGroup):
     name_employee = State()
+    name_award = State()
+    date = State()
