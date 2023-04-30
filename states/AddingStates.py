@@ -12,6 +12,9 @@ class AddChild(StatesGroup):
 
 class AddContact(StatesGroup):
     descr = State()
+    type = State()
+    date_start = State()
+    date_end = State()
 
 class AddPosition(StatesGroup):
     descr = State()

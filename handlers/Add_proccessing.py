@@ -18,7 +18,7 @@ async def name_employee_handler(message: types.Message, state : FSMContext):
     chat_id = message.chat.id
     # await remove_chat_buttons(chat_id)
     await AddEmployee.next()
-    await bot.send_message(chat_id, "Введите дату найма нового сотрудника?\n(если сотрудник нанят сегодня, то введите <b>now</b> или сегодняшнюю дату)", parse_mode="html", reply_markup=types.ReplyKeyboardRemove())
+    await bot.send_message(chat_id, "Введите дату найма нового сотрудника?\n(если сотрудник нанят сегодня, то введите, пожалуйста, сегодняшнюю дату)", reply_markup=types.ReplyKeyboardRemove())
 
 
 async def date_hire_employee_handler(message: types.Message, state : FSMContext):
@@ -76,14 +76,59 @@ async def birthday_child_handler(message: types.Message, state : FSMContext):
     await state.finish()
     await AdminStatus.authorized.set()
 
-    await bot.send_message(chat_id, "Принято. Хотите продолжить?\nМеню - /start_menu", reply_markup=kb_continue)
+    await bot.send_message(chat_id, "Принято. Хотите добавить ещё одного ребёнка?\nМеню - /start_menu", reply_markup=kb_continue)
 
 
 async def add_contract_handler(call: types.CallbackQuery, state : FSMContext):
     # await remove_chat_buttons(chat_id)
     await AddContact.descr.set()
-    await call.message.answer("Введите название контракта", reply_markup=types.ReplyKeyboardRemove())
+    await call.message.answer("Введите название и описание контракта", reply_markup=types.ReplyKeyboardRemove())
     await call.answer()
+
+
+async def description_contract_handler(message: types.Message, state : FSMContext):
+    chat_id = message.chat.id
+    # await remove_chat_buttons(chat_id)
+
+    kb_type_contract = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    butts = [types.KeyboardButton("основной"), types.KeyboardButton("дополнительный")]
+    kb_type_contract.add(*butts)
+
+    await AddContact.next()
+
+    await bot.send_message(chat_id, "Введите тип контракта: <b>основной</b>/<b>дополнительный</b>)", parse_mode="html", reply_markup=kb_type_contract)
+
+
+async def type_contract_handler(message: types.Message, state : FSMContext):
+    chat_id = message.chat.id
+    # await remove_chat_buttons(chat_id)
+
+    await AddContact.next()
+
+    await bot.send_message(chat_id, "Введите дату начала контракта", reply_markup=types.ReplyKeyboardRemove())
+
+
+async def start_contract_date_handler(message: types.Message, state : FSMContext):
+    chat_id = message.chat.id
+    # await remove_chat_buttons(chat_id)
+
+    await AddContact.next()
+
+    await bot.send_message(chat_id, "Введите дату окончания контракта", reply_markup=types.ReplyKeyboardRemove())
+
+
+async def end_contract_date_handler(message: types.Message, state : FSMContext):
+    chat_id = message.chat.id
+    # await remove_chat_buttons(chat_id)
+
+    kb_continue = types.InlineKeyboardMarkup(resize_keyboard=True)
+    butts = types.InlineKeyboardButton(text="Продолжить", callback_data="add_contract")
+    kb_continue.add(butts)
+
+    await state.finish()
+    await AdminStatus.authorized.set()
+
+    await bot.send_message(chat_id, "Принято. Хотите добавить ещё один контракт?\nМеню - /start_menu", reply_markup=kb_continue)
 
 
 async def add_position_handler(call: types.CallbackQuery, state : FSMContext):
