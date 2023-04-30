@@ -10,7 +10,7 @@ class AddChild(StatesGroup):
     name_employee = State()
     birthday = State()
 
-class AddContact(StatesGroup):
+class AddContract(StatesGroup):
     descr = State()
     type = State()
     date_start = State()
@@ -18,6 +18,8 @@ class AddContact(StatesGroup):
 
 class AddPosition(StatesGroup):
     descr = State()
+    wage = State()
+    num_stuff = State()
 
 class AddAward(StatesGroup):
     type = State()
