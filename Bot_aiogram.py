@@ -10,6 +10,7 @@ from handlers.Update_proccessing import *
 register_handlers_client(dp)
 register_handlers_admin(dp)
 register_handlers_add(dp)
+register_handlers_delete(dp)
 
 if __name__ == '__main__':
     executor.start_polling(dp)

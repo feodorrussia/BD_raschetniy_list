@@ -253,7 +253,7 @@ async def date_award_handler(message: types.Message, state : FSMContext):
     await bot.send_message(chat_id, "Принято. Хотите назначить ещё одно поощрение/штраф сотруднику?\nМеню - /start_menu", reply_markup=kb_continue)
 
 
-def register_handlers_add(dp : Dispatcher):
+def register_handlers_delete(dp : Dispatcher):
     dp.register_callback_query_handler(add_employee_handler, lambda call: call.data == "add_employee", state=AdminStatus.authorized)
     dp.register_message_handler(name_employee_handler, state=AddEmployee.name)
     dp.register_message_handler(date_hire_employee_handler, state=AddEmployee.date_hire)
