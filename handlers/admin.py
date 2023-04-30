@@ -18,7 +18,8 @@ async def add_default_handler(call: types.CallbackQuery):
     await call.answer()
 
 async def add_menu_handler(message: types.Message):
-    await bot.send_message("Выберите, что/кого Вы хотите добавить\nМеню - /start_menu", reply_markup=kb_add_def)
+    chat_id = message.chat.id
+    await bot.send_message(chat_id, "Выберите, что/кого Вы хотите добавить\nМеню - /start_menu", reply_markup=kb_add_def)
 
 
 # @bot.callback_query_handler(text="upd_default")
@@ -27,7 +28,8 @@ async def upd_default_handler(call: types.CallbackQuery):
     await call.answer()
 
 async def upd_menu_handler(message: types.Message):
-    await bot.send_message("Выберите, что/кого Вы хотите изменить\nМеню - /start_menu", reply_markup=kb_upd_def)
+    chat_id = message.chat.id
+    await bot.send_message(chat_id, "Выберите, что/кого Вы хотите изменить\nМеню - /start_menu", reply_markup=kb_upd_def)
 
 
 # @bot.callback_query_handler(text="del_default")
@@ -36,7 +38,8 @@ async def del_default_handler(call: types.CallbackQuery):
     await call.answer()
 
 async def del_menu_handler(message: types.Message):
-    await bot.send_message("Выберите, что/кого Вы хотите удалить/уволить/завершить\nМеню - /start_menu", reply_markup=kb_del_def)
+    chat_id = message.chat.id
+    await bot.send_message(chat_id, "Выберите, что/кого Вы хотите удалить/уволить/завершить\nМеню - /start_menu", reply_markup=kb_del_def)
 
 
 # @bot.callback_query_handler(text="gen_default")
@@ -45,7 +48,8 @@ async def gen_default_handler(call: types.CallbackQuery):
     await call.answer()
 
 async def gen_menu_handler(message: types.Message):
-    await bot.send_message("Выберите, что Вы хотите сгенерировать\nМеню - /start_menu", reply_markup=kb_gen_def)
+    chat_id = message.chat.id
+    await bot.send_message(chat_id, "Выберите, что Вы хотите сгенерировать\nМеню - /start_menu", reply_markup=kb_gen_def)
 
 
 async def cancel_handler(message : types.Message, state : FSMContext):
