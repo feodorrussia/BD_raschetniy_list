@@ -174,7 +174,7 @@ async def add_award_handler(call: types.CallbackQuery, state : FSMContext):
 
     kb_award = types.ReplyKeyboardMarkup(resize_keyboard=True)
     butts = [types.KeyboardButton("Поощрение"), types.KeyboardButton("Штраф")]
-    kb_award.add(butts)
+    kb_award.add(*butts)
 
     # await remove_chat_buttons(chat_id)
     await AddAward.type.set()
@@ -225,7 +225,7 @@ async def name_employee_to_award_handler(message: types.Message, state : FSMCont
     chat_id = message.chat.id
     # await remove_chat_buttons(chat_id)
 
-    await AddAward.next()
+    await AddAwardToEmployee.next()
 
     await bot.send_message(chat_id, f"Введите название поощрения/штрафа\n{'список поощрений/штрафов'}", reply_markup=types.ReplyKeyboardRemove())
 
@@ -234,7 +234,7 @@ async def name_award_handler(message: types.Message, state : FSMContext):
     chat_id = message.chat.id
     # await remove_chat_buttons(chat_id)
 
-    await AddAward.next()
+    await AddAwardToEmployee.next()
 
     await bot.send_message(chat_id, "Введите дату назначения поощрения/штрафа", reply_markup=types.ReplyKeyboardRemove())
 
