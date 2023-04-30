@@ -26,7 +26,7 @@ async def upd_default_handler(call: types.CallbackQuery):
 
 # @bot.callback_query_handler(text="del_default")
 async def del_default_handler(call: types.CallbackQuery):
-    await call.message.answer("Выберите, что/кого Вы хотите удалить/уволить\nМеню - /start_menu", reply_markup=kb_del_def)
+    await call.message.answer("Выберите, что/кого Вы хотите удалить/уволить/завершить\nМеню - /start_menu", reply_markup=kb_del_def)
     await call.answer()
 
 

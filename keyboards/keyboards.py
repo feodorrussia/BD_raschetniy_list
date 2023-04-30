@@ -23,7 +23,7 @@ kb_add_def.add(*buttons_2)
 
 kb_del_def = types.InlineKeyboardMarkup(row_width=2, resize_keyboard=True)
 buttons_3 = [types.InlineKeyboardButton(text="Сотрудник", callback_data="del_employee"),
-            types.InlineKeyboardButton(text="Контракт", callback_data="del_cantract"),
+            types.InlineKeyboardButton(text="Контракт", callback_data="del_contract"),
             types.InlineKeyboardButton(text="Ребёнок", callback_data="del_child"),
             types.InlineKeyboardButton(text="Поощрение/штраф", callback_data="del_award"),
             types.InlineKeyboardButton(text="Должность", callback_data="del_position")]
