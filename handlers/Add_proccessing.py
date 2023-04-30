@@ -188,7 +188,7 @@ async def type_award_handler(message: types.Message, state : FSMContext):
 
     await AddAward.next()
 
-    await bot.send_message(chat_id, "Введите зарплату сотрудника на этой должности", reply_markup=types.ReplyKeyboardRemove())
+    await bot.send_message(chat_id, f"Введите описание {'поощрения' if True else 'штрафа'}", reply_markup=types.ReplyKeyboardRemove())
 
 
 async def description_award_handler(message: types.Message, state : FSMContext):
@@ -197,7 +197,7 @@ async def description_award_handler(message: types.Message, state : FSMContext):
 
     await AddAward.next()
 
-    await bot.send_message(chat_id, "Введите количество человек, необходимых на этой должности (количество полных ставок)", reply_markup=types.ReplyKeyboardRemove())
+    await bot.send_message(chat_id, f"Введите сумму {'поощрения' if True else 'штрафа'}", reply_markup=types.ReplyKeyboardRemove())
 
 
 async def award_cost_handler(message: types.Message, state : FSMContext):
@@ -211,7 +211,7 @@ async def award_cost_handler(message: types.Message, state : FSMContext):
     await state.finish()
     await AdminStatus.authorized.set()
 
-    await bot.send_message(chat_id, "Принято. Хотите добавить ещё одну должность?\nМеню - /start_menu", reply_markup=kb_continue)
+    await bot.send_message(chat_id, "Принято. Хотите добавить ещё одно поощрение/должность?\nМеню - /start_menu", reply_markup=kb_continue)
 
 
 async def add_award_to_employee_handler(call: types.CallbackQuery, state : FSMContext):
