@@ -32,7 +32,11 @@ async def date_fire_handler(message: types.Message, state : FSMContext):
     await state.finish()
     await AdminStatus.authorized.set()
 
-    await bot.send_message(chat_id, "Принято. Хотите уволить ещё одного сотрудника?\nМеню - /start_menu", reply_markup=kb_continue)
+    await bot.send_message(chat_id, "Принято. Хотите уволить ещё одного сотрудника?\nМеню - /start_menu" +
+                           "\nМеню добавления - /add_menu" +
+                           "\nМеню удаления - /del_menu" +
+                           "\nМеню изменения - /upd_menu" +
+                           "\nМеню запросов - /gen_menu", reply_markup=kb_continue)
 
 
 async def end_contract_handler(call: types.CallbackQuery, state : FSMContext):
