@@ -29,14 +29,14 @@ buttons_3 = [types.InlineKeyboardButton(text="Сотрудник", callback_data
             types.InlineKeyboardButton(text="Должность", callback_data="del_position")]
 kb_del_def.add(*buttons_3)
 
-kb_gen_def = types.InlineKeyboardMarkup(row_width=1, resize_keyboard=True)
+kb_gen_def = types.InlineKeyboardMarkup(row_width=2, resize_keyboard=True)
 buttons_4 = [types.InlineKeyboardButton(text="Список вакансий", callback_data="gen_vacancy"),
             types.InlineKeyboardButton(text="Расчётный лист сотрудника", callback_data="gen_employee_profit"),
             types.InlineKeyboardButton(text="Письмо предупреждения", callback_data="gen_warning"),
             types.InlineKeyboardButton(text="Годовой доход всех сотрудников", callback_data="gen_profit")]
 kb_gen_def.add(*buttons_4)
 
-kb_upd_def = types.InlineKeyboardMarkup(row_width=1, resize_keyboard=True)
+kb_upd_def = types.InlineKeyboardMarkup(row_width=2, resize_keyboard=True)
 buttons_5 = [types.InlineKeyboardButton(text="Сотрудник", callback_data="edit_employee"),
             types.InlineKeyboardButton(text="Ребёнок", callback_data="edit_child"),
             types.InlineKeyboardButton(text="Ставка сотрудника", callback_data="edit_rate"),

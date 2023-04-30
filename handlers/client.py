@@ -9,7 +9,7 @@ from states.AdminStatus import AdminStatus
 # @dp.message_handler(commands=['start'])
 async def process_start_command(message: types.Message):
     await AdminStatus.unauthorized.set()
-    await message.reply(f"Здравствуй, {message.from_user.first_name}\n(Будь паинькой, скажи привет)")
+    await message.reply(f"Здравствуй, {message.from_user.first_name}\n(Будь паинькой, скажи привет)\n\nАвторизоваться - /admin")
 
 
 # @dp.message_handler()
