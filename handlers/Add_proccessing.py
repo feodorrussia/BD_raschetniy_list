@@ -205,7 +205,7 @@ async def award_cost_handler(message: types.Message, state : FSMContext):
     # await remove_chat_buttons(chat_id)
 
     kb_continue = types.InlineKeyboardMarkup(resize_keyboard=True)
-    butts = types.InlineKeyboardButton(text="Продолжить", callback_data="add_position")
+    butts = types.InlineKeyboardButton(text="Продолжить", callback_data="add_award")
     kb_continue.add(butts)
 
     await state.finish()
@@ -244,7 +244,7 @@ async def date_award_handler(message: types.Message, state : FSMContext):
     # await remove_chat_buttons(chat_id)
 
     kb_continue = types.InlineKeyboardMarkup(resize_keyboard=True)
-    butts = types.InlineKeyboardButton(text="Продолжить", callback_data="add_position")
+    butts = types.InlineKeyboardButton(text="Продолжить", callback_data="add_award_to_employee")
     kb_continue.add(butts)
 
     await state.finish()
@@ -284,4 +284,3 @@ def register_handlers_add(dp : Dispatcher):
     dp.register_message_handler(name_employee_to_award_handler, state=AddAwardToEmployee.name_employee)
     dp.register_message_handler(name_award_handler, state=AddAwardToEmployee.name_award)
     dp.register_message_handler(date_award_handler, state=AddAwardToEmployee.date)
-
