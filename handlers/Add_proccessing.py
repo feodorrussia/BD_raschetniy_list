@@ -56,6 +56,29 @@ async def add_child_handler(call: types.CallbackQuery, state : FSMContext):
     await call.answer()
 
 
+async def name_parent_handler(message: types.Message, state : FSMContext):
+    chat_id = message.chat.id
+    # await remove_chat_buttons(chat_id)
+
+    await AddChild.next()
+
+    await bot.send_message(chat_id, "Введите дату рождения ребёнка", reply_markup=types.ReplyKeyboardRemove())
+
+
+async def birthday_child_handler(message: types.Message, state : FSMContext):
+    chat_id = message.chat.id
+    # await remove_chat_buttons(chat_id)
+
+    kb_continue = types.InlineKeyboardMarkup(resize_keyboard=True)
+    butts = types.InlineKeyboardButton(text="Продолжить", callback_data="add_child")
+    kb_continue.add(butts)
+
+    await state.finish()
+    await AdminStatus.authorized.set()
+
+    await bot.send_message(chat_id, "Принято. Хотите продолжить?\nМеню - /start_menu", reply_markup=kb_continue)
+
+
 async def add_contract_handler(call: types.CallbackQuery, state : FSMContext):
     # await remove_chat_buttons(chat_id)
     await AddContact.descr.set()
@@ -97,6 +120,8 @@ def register_handlers_add(dp : Dispatcher):
     dp.register_message_handler(children_employee_handler, state=AddEmployee.children)
 
     dp.register_callback_query_handler(add_child_handler, lambda call: call.data == "add_child", state=AdminStatus.authorized)
+    dp.register_message_handler(name_parent_handler, state=AddChild.name_employee)
+    dp.register_message_handler(birthday_child_handler, state=AddChild.birthday)
 
     dp.register_callback_query_handler(add_contract_handler, lambda call: call.data == "add_contract", state=AdminStatus.authorized)
 
