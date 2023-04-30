@@ -145,7 +145,7 @@ class Award(Basic):
 
     type = Column(Enum(AwardTypes), nullable=False, default=AwardTypes.award)
     descr = Column(String(250), default=None)
-    sum = Column(Float, nullable=False)
+    cost = Column(Float, nullable=False)
 
     def info(self):
         return f"{self.type} sum:{self.sum}{'; description: ' + self.descr if self.descr is not None or self.descr != '' else ''}"
