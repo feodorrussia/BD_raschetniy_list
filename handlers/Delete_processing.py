@@ -7,21 +7,23 @@ from states.DeletingStates import *
 from states.AdminStatus import AdminStatus
 
 
-async def fire_employee_handler(call: types.CallbackQuery, state : FSMContext):
+async def fire_employee_handler(call: types.CallbackQuery, state: FSMContext):
     # await remove_chat_buttons(chat_id)
     await FireEmployee.name_employee.set()
     await call.message.answer("Введите ФИО уволенного сотрудника", reply_markup=types.ReplyKeyboardRemove())
     await call.answer()
 
 
-async def name_employee_fire_handler(message: types.Message, state : FSMContext):
+async def name_employee_fire_handler(message: types.Message, state: FSMContext):
     chat_id = message.chat.id
     # await remove_chat_buttons(chat_id)
     await FireEmployee.next()
-    await bot.send_message(chat_id, "Введите дату увольнения сотрудника?\n(если сотрудник уволен сегодня, то введите, пожалуйста, сегодняшнюю дату)", reply_markup=types.ReplyKeyboardRemove())
+    await bot.send_message(chat_id,
+                           "Введите дату увольнения сотрудника?\n(если сотрудник уволен сегодня, то введите сегодняшнюю дату)",
+                           reply_markup=types.ReplyKeyboardRemove())
 
 
-async def date_fire_handler(message: types.Message, state : FSMContext):
+async def date_fire_handler(message: types.Message, state: FSMContext):
     chat_id = message.chat.id
     # await remove_chat_buttons(chat_id)
 
@@ -39,14 +41,15 @@ async def date_fire_handler(message: types.Message, state : FSMContext):
                            "\nМеню запросов - /gen_menu\n\nВыйти - /exit", reply_markup=kb_continue)
 
 
-async def end_contract_handler(call: types.CallbackQuery, state : FSMContext):
+async def end_contract_handler(call: types.CallbackQuery, state: FSMContext):
     # await remove_chat_buttons(chat_id)
     await EndContract.name.set()
-    await call.message.answer("Введите название контракта, который хотите закончить", reply_markup=types.ReplyKeyboardRemove())
+    await call.message.answer("Введите название контракта, который хотите закончить",
+                              reply_markup=types.ReplyKeyboardRemove())
     await call.answer()
 
 
-async def delete_child_handler(call: types.CallbackQuery, state : FSMContext):
+async def delete_child_handler(call: types.CallbackQuery, state: FSMContext):
     # await remove_chat_buttons(chat_id)
     await DeleteChild.name_employee.set()
 
@@ -54,22 +57,23 @@ async def delete_child_handler(call: types.CallbackQuery, state : FSMContext):
     await call.answer()
 
 
-async def delete_award_handler(call: types.CallbackQuery, state : FSMContext):
+async def delete_award_handler(call: types.CallbackQuery, state: FSMContext):
     # await remove_chat_buttons(chat_id)
     await DeleteAward.type.set()
     await call.message.answer("Введите тип (поощрение/штраф)", reply_markup=types.ReplyKeyboardRemove())
     await call.answer()
 
 
-async def delete_position_handler(call: types.CallbackQuery, state : FSMContext):
+async def delete_position_handler(call: types.CallbackQuery, state: FSMContext):
     # await remove_chat_buttons(chat_id)
     await DeletePosition.name.set()
     await call.message.answer("Введите название должности", reply_markup=types.ReplyKeyboardRemove())
     await call.answer()
 
 
-def register_handlers_add(dp : Dispatcher):
-    dp.register_callback_query_handler(fire_employee_handler, lambda call: call.data == "del_employee", state=AdminStatus.authorized)
+def register_handlers_delete(dp: Dispatcher):
+    dp.register_callback_query_handler(fire_employee_handler, lambda call: call.data == "del_employee",
+                                       state=AdminStatus.authorized)
     dp.register_message_handler(name_employee_fire_handler, state=FireEmployee.name_employee)
     dp.register_message_handler(date_fire_handler, state=FireEmployee.date_fire)
 
@@ -84,4 +88,3 @@ def register_handlers_add(dp : Dispatcher):
 
     dp.register_callback_query_handler(delete_position_handler, lambda call: call.data == "del_position",
                                        state=AdminStatus.authorized)
-
