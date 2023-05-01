@@ -36,15 +36,15 @@ buttons_4 = [types.InlineKeyboardButton(text="Список вакансий", ca
             types.InlineKeyboardButton(text="Годовой доход всех сотрудников", callback_data="gen_profit")]
 kb_gen_def.add(*buttons_4)
 
-kb_upd_def = types.InlineKeyboardMarkup(row_width=2, resize_keyboard=True)
+kb_edit_def = types.InlineKeyboardMarkup(row_width=2, resize_keyboard=True)
 buttons_5 = [types.InlineKeyboardButton(text="Сотрудник", callback_data="edit_employee"),
             types.InlineKeyboardButton(text="Ребёнок", callback_data="edit_child"),
             types.InlineKeyboardButton(text="Ставка сотрудника", callback_data="edit_rate"),
-            types.InlineKeyboardButton(text="Контракт", callback_data="edit_cantract"),
+            types.InlineKeyboardButton(text="Контракт", callback_data="edit_contract"),
             types.InlineKeyboardButton(text="Должность", callback_data="edit_position"),
             types.InlineKeyboardButton(text="Поощрение/штраф", callback_data="edit_award"),
             types.InlineKeyboardButton(text="Поощрения/штрафы сотрудника", callback_data="edit_award_employee")]
-kb_upd_def.add(*buttons_5)
+kb_edit_def.add(*buttons_5)
 
 kb_cancel = types.ReplyKeyboardMarkup(resize_keyboard=True)
 but_cancel = types.KeyboardButton("Отмена")

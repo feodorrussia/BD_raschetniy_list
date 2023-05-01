@@ -287,7 +287,7 @@ async def date_award_handler(message: types.Message, state: FSMContext):
                            "\nМеню запросов - /gen_menu\n\nВыйти - /exit", reply_markup=kb_continue)
 
 
-def register_handlers_delete(dp: Dispatcher):
+def register_handlers_add(dp: Dispatcher):
     dp.register_callback_query_handler(add_employee_handler, lambda call: call.data == "add_employee",
                                        state=AdminStatus.authorized)
     dp.register_message_handler(name_employee_handler, state=AddEmployee.name)

@@ -1,6 +1,6 @@
 from aiogram import types, Dispatcher
 from create_bot import bot, dp
-from keyboards.keyboards import kb_cancel, kb_admin_def, kb_add_def, kb_del_def, kb_gen_def, kb_upd_def
+from keyboards.keyboards import kb_cancel, kb_admin_def, kb_add_def, kb_del_def, kb_gen_def, kb_edit_def
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from states.AdminStatus import AdminStatus
@@ -23,13 +23,13 @@ async def add_menu_handler(message: types.Message):
 
 
 # @bot.callback_query_handler(text="upd_default")
-async def upd_default_handler(call: types.CallbackQuery):
-    await call.message.answer("Выберите, что/кого Вы хотите изменить\nМеню - /start_menu", reply_markup=kb_upd_def)
+async def edit_default_handler(call: types.CallbackQuery):
+    await call.message.answer("Выберите, что/кого Вы хотите изменить\nМеню - /start_menu", reply_markup=kb_edit_def)
     await call.answer()
 
-async def upd_menu_handler(message: types.Message):
+async def edit_menu_handler(message: types.Message):
     chat_id = message.chat.id
-    await bot.send_message(chat_id, "Выберите, что/кого Вы хотите изменить\nМеню - /start_menu", reply_markup=kb_upd_def)
+    await bot.send_message(chat_id, "Выберите, что/кого Вы хотите изменить\nМеню - /start_menu", reply_markup=kb_edit_def)
 
 
 # @bot.callback_query_handler(text="del_default")
@@ -83,8 +83,8 @@ def register_handlers_admin(dp : Dispatcher):
     dp.register_message_handler(add_menu_handler, commands=['add_menu'], state=AdminStatus.authorized)
     dp.register_callback_query_handler(add_default_handler, lambda call: call.data == "add_default", state=AdminStatus.authorized)
 
-    dp.register_message_handler(upd_menu_handler, commands=['upd_menu'], state=AdminStatus.authorized)
-    dp.register_callback_query_handler(upd_default_handler, lambda call: call.data == "upd_default", state=AdminStatus.authorized)
+    dp.register_message_handler(edit_menu_handler, commands=['upd_menu'], state=AdminStatus.authorized)
+    dp.register_callback_query_handler(edit_default_handler, lambda call: call.data == "upd_default", state=AdminStatus.authorized)
 
     dp.register_message_handler(del_menu_handler, commands=['del_menu'], state=AdminStatus.authorized)
     dp.register_callback_query_handler(del_default_handler, lambda call: call.data == "del_default", state=AdminStatus.authorized)
