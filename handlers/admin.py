@@ -54,12 +54,14 @@ async def gen_menu_handler(message: types.Message):
 
 async def cancel_handler(message : types.Message, state : FSMContext):
     current_state = await state.get_state()
+
     if current_state is None:
         return
     if current_state == "AdminStatus:authorizing":
         await AdminStatus.unauthorized.set()
         await message.reply("Как скажете, Барин.\nАвторизоваться снова - /admin", reply_markup=types.ReplyKeyboardRemove())
         return
+
     await AdminStatus.authorized.set()
     await message.reply("Как скажете, Барин.\nМеню - /start_menu\nВыйти - /exit", reply_markup=types.ReplyKeyboardRemove())
 
