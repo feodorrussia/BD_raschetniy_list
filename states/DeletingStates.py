@@ -4,22 +4,19 @@ class FireEmployee(StatesGroup):
     name_employee = State()
     date_fire = State()
 
-class EndContract(StatesGroup):
+class DeleteContract(StatesGroup):
     name = State()
-    end_date = State()
+    check = State()
 
 class DeleteChild(StatesGroup):
     name_employee = State()
-    check = State()
-    deleting = State()
+    date = State()
 
 class DeleteAward(StatesGroup):
     type = State()
     name = State()
     check = State()
-    deleting = State()
 
 class DeletePosition(StatesGroup):
     name = State()
     check = State()
-    deleting = State()
