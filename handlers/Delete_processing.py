@@ -19,7 +19,7 @@ async def name_employee_fire_handler(message: types.Message, state: FSMContext):
     # await remove_chat_buttons(chat_id)
     await FireEmployee.next()
     await bot.send_message(chat_id,
-                           "Введите дату увольнения сотрудника?\n(если сотрудник уволен сегодня, то введите сегодняшнюю дату)",
+                           "Введите дату увольнения сотрудника\n(если сотрудник уволен сегодня, то введите сегодняшнюю дату)",
                            reply_markup=types.ReplyKeyboardRemove())
 
 
