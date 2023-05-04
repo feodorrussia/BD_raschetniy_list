@@ -73,11 +73,23 @@ async def exit_handler(message : types.Message, state : FSMContext):
     await AdminStatus.unauthorized.set()
     await message.reply("Как скажете, Барин.\nАвторизоваться - /admin", reply_markup=types.ReplyKeyboardRemove())
 
+async def help_handler(message : types.Message, state : FSMContext):
+    current_state = await state.get_state()
+    if current_state is None:
+        return
+
+    await AdminStatus.authorized.set()
+    await message.reply("Всегда рад, Барин.\nВы в любой момент можете написать <b>отмена</b> или ввести команду /cancel - текущая задача остановится и Вы перейдёте в начало."+
+                        "\nМеню - /start_menu\nПомощь - /help\nВыйти - /exit",
+                           parse_mode="html", reply_markup=types.ReplyKeyboardRemove())
+
 def register_handlers_admin(dp : Dispatcher):
     dp.register_message_handler(menu_handler, commands=['start_menu'], state=AdminStatus.authorized)
     dp.register_message_handler(menu_handler, Text(equals="меню", ignore_case=True), state=AdminStatus.authorized)
     dp.register_message_handler(cancel_handler, state="*", commands=['cancel'])
     dp.register_message_handler(cancel_handler, Text(equals="отмена", ignore_case=True), state="*")
+    dp.register_message_handler(help_handler, state="*", commands=['help'])
+    dp.register_message_handler(help_handler, Text(equals="помоги", ignore_case=True), state="*")
     dp.register_message_handler(exit_handler, state=AdminStatus.authorized, commands=['exit'])
     dp.register_message_handler(exit_handler, Text(equals="выйти", ignore_case=True), state=AdminStatus.authorized)
 
