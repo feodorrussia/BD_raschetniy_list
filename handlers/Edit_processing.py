@@ -68,7 +68,7 @@ async def update_rate_handler(message: types.Message, state: FSMContext):
     await AdminStatus.authorized.set()
 
     await bot.send_message(chat_id, "Ставка обновлена. Желаете продолжить?" +
-                           "\nКонтракт удалён.\n\nМеню - /start_menu" +
+                           "\n\nМеню - /start_menu" +
                            "\nМеню добавления - /add_menu" +
                            "\nМеню удаления - /del_menu" +
                            "\nМеню изменения - /upd_menu" +
@@ -114,8 +114,8 @@ def register_handlers_edit(dp: Dispatcher):
     dp.register_callback_query_handler(edit_rate_employee_handler, lambda call: call.data == "edit_rate",
                                        state=AdminStatus.authorized)
     dp.register_message_handler(name_employee_rate_handler, state=EditRate.name_employee)
-    dp.register_message_handler(position_rate_handler, state=EditRate.position)
-    dp.register_callback_query_handler(update_rate_handler, state=EditRate.new_value)
+    dp.register_callback_query_handler(position_rate_handler, state=EditRate.position)
+    dp.register_message_handler(update_rate_handler, state=EditRate.new_value)
 
     dp.register_callback_query_handler(edit_contract_handler , lambda call: call.data == "edit_contract",
                                        state=AdminStatus.authorized)
