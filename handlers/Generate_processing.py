@@ -17,7 +17,8 @@ async def generate_list_vacancy_handler(call: types.CallbackQuery, state: FSMCon
 
     await call.message.answer("Ваш список вакансий. Хотите получить список файлом?\n\n" +
                               "№ - Название - N полных ставок Х Зарплата:\n{}\n\nМеню - /start_menu".format(
-                                  "\n".join([str(i + 1) + ". " + list_vacancies[i] for i in range(len(list_vacancies))])) +
+                                  "\n".join(
+                                      [str(i + 1) + ". " + list_vacancies[i] for i in range(len(list_vacancies))])) +
                               "\nМеню добавления - /add_menu" +
                               "\nМеню удаления - /del_menu" +
                               "\nМеню изменения - /upd_menu" +
@@ -88,7 +89,12 @@ async def generate_list_warning_handler(call: types.CallbackQuery, state: FSMCon
 
     await call.message.answer(
         "Итоговый расчёт за месяц меньше нуля у следующих сотрудников:\n\n{}".format(
-            "\n".join([str(i + 1) + ". " + list_employees[i] for i in range(len(list_employees))])),
+            "\n".join([str(i + 1) + ". " + list_employees[i] for i in range(len(list_employees))])) +
+        "\n\nМеню - /start_menu" +
+        "\nМеню добавления - /add_menu" +
+        "\nМеню удаления - /del_menu" +
+        "\nМеню изменения - /upd_menu" +
+        "\nМеню запросов - /gen_menu\n\nВыйти - /exit",
         reply_markup=types.ReplyKeyboardRemove())
     await call.answer()
 
