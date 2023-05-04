@@ -10,14 +10,21 @@ class EditChild(StatesGroup):
 
 class EditRate(StatesGroup):
     name_employee = State()
+    position = State()
+    new_value = State()
+
+
+class EditContract(StatesGroup):
+    name_contract = State()
 
 
 class EditPosition(StatesGroup):
-    name_employee = State()
+    name_position = State()
 
 
 class EditAward(StatesGroup):
-    name_employee = State()
+    type = State()
+    name_award = State()
 
 
 class EditAwardEmployee(StatesGroup):
