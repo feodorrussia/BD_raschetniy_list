@@ -199,6 +199,37 @@ async def generate_award_list_message_handler(message: types.Message, state: FSM
                            reply_markup=types.ReplyKeyboardRemove())
 
 
+async def generate_contract_list_handler(call: types.CallbackQuery, state: FSMContext):
+    # await remove_chat_buttons(chat_id)
+    # await GenerateWarning.name_employee.set()
+
+    contracts = session.query(Contract).all()
+
+    await call.message.answer(generate_employee_list(contracts))
+    await call.message.answer("\n\nМеню - /start_menu" +
+                              "\nМеню добавления - /add_menu" +
+                              "\nМеню удаления - /del_menu" +
+                              "\nМеню изменения - /upd_menu" +
+                              "\nМеню запросов - /gen_menu\n\nВыйти - /exit",
+                              reply_markup=types.ReplyKeyboardRemove())
+    await call.answer()
+
+
+async def generate_contract_list_message_handler(message: types.Message, state: FSMContext):
+    # await remove_chat_buttons(chat_id)
+    # await GenerateWarning.name_employee.set()
+
+    contracts = session.query(Employee).all()
+
+    await bot.send_message(message.chat.id, generate_employee_list(contracts))
+    await bot.send_message(message.chat.id, "\n\nМеню - /start_menu" +
+                           "\nМеню добавления - /add_menu" +
+                           "\nМеню удаления - /del_menu" +
+                           "\nМеню изменения - /upd_menu" +
+                           "\nМеню запросов - /gen_menu\n\nВыйти - /exit",
+                           reply_markup=types.ReplyKeyboardRemove())
+
+
 def register_handlers_generate(dp: Dispatcher):
     dp.register_callback_query_handler(generate_list_vacancy_handler, lambda call: call.data == "gen_vacancy",
                                        state="*")
@@ -214,14 +245,17 @@ def register_handlers_generate(dp: Dispatcher):
 
     dp.register_callback_query_handler(generate_employee_list_handler, lambda call: call.data == "gen_employee_list",
                                        state="*")
-
     dp.register_message_handler(generate_employee_list_message_handler, commands=['employees'],
                                        state="*")
 
     dp.register_callback_query_handler(generate_award_list_handler, lambda call: call.data == "gen_award_list",
                                        state="*")
-
     dp.register_message_handler(generate_award_list_message_handler, commands=['awards'],
+                                       state="*")
+
+    dp.register_callback_query_handler(generate_contract_list_handler, lambda call: call.data == "gen_contract_list",
+                                       state="*")
+    dp.register_message_handler(generate_award_list_message_handler, commands=['contracts'],
                                        state="*")
 
     dp.register_callback_query_handler(generate_list_employee_profit_handler,

@@ -48,5 +48,13 @@ def generate_award_list(awards):
         return "Пусто."
 
 
+def generate_contract_list(contracts):
+    if len(contracts) > 0:
+        return "Список контрактов:\n" + "\n".join([c.name + " - " + c.type + ": " + c.start_date + " - " + c.end_date for c in
+                                                   contracts])
+    else:
+        return "Пусто."
+
+
 def date_rules():
     return "Формат даты ДД.ММ.ГГГГ. Также она не должна быть больше сегодняшней.\n"
