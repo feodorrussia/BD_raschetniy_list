@@ -58,7 +58,7 @@ async def date_hire_employee_handler(message: types.Message, state: FSMContext):
                                parse_mode="html")
     else:
         await bot.send_message(chat_id,
-                               "Дата введена не правильно. Введите дату найма нового сотрудника\n(если сотрудник нанят сегодня, то введите, пожалуйста, сегодняшнюю дату)",
+                               f"Дата введена не правильно. {date_rules()}Введите дату найма нового сотрудника\n(если сотрудник нанят сегодня, то введите, пожалуйста, сегодняшнюю дату)",
                                reply_markup=types.ReplyKeyboardRemove())
 
 
@@ -82,15 +82,14 @@ async def gender_employee_handler(message: types.Message, state: FSMContext):
         session.commit()
 
         del (data[f"{chat_id}_add_employee"])
-
-        data[f"{chat_id}_add_child"] = {"parent_id": session.query(Employee).filter_by(firstname=name[0],
-                                                                                       lastname=name[1],
-                                                                                       date_hired=datetime.date(
-                                                                                           date_hire[2],
-                                                                                           date_hire[1],
-                                                                                           date_hire[0]),
-                                                                                       gender=gender).first().id}
         file.close()
+
+    data[f"{chat_id}_add_child"] = {"parent_id": session.query(Employee).filter_by(firstname=name[0], lastname=name[1],
+                                                                                   date_hired=datetime.date(
+                                                                                       date_hire[2],
+                                                                                       date_hire[1],
+                                                                                       date_hire[0]),
+                                                                                   gender=gender).first().id}
     with open(data_name_file, "w") as file:
         json.dump(data, file, indent=4)
 
@@ -123,7 +122,7 @@ async def children_employee_handler(message: types.Message, state: FSMContext):
                                parse_mode="html", reply_markup=kb_cancel)
     else:
         await bot.send_message(chat_id,
-                               "Дата введена не правильно. Введите дату рождения ребёнка нового сотрудника (чтобы закончить напишите <b>отмена</b>)",
+                               f"Дата введена не правильно. {date_rules()}Введите дату рождения ребёнка нового сотрудника (чтобы закончить напишите <b>отмена</b>)",
                                reply_markup=kb_cancel)
 
 
@@ -146,7 +145,7 @@ async def name_parent_handler(message: types.Message, state: FSMContext):
             data[f"{chat_id}_add_child"] = {"parent_id": employees[0].id}
         else:
             await bot.send_message(chat_id, "Сотрудник не найден. Введите ФИО сотрудника\n" +
-                                            "Список сотрудников - /employees", reply_markup=types.ReplyKeyboardRemove())
+                                   "Список сотрудников - /employees", reply_markup=types.ReplyKeyboardRemove())
             return
         file.close()
     with open(data_name_file, "w") as file:
@@ -154,7 +153,8 @@ async def name_parent_handler(message: types.Message, state: FSMContext):
 
     await AddChild.next()
 
-    await bot.send_message(chat_id, "Сотрудник найден. Введите дату рождения ребёнка", reply_markup=types.ReplyKeyboardRemove())
+    await bot.send_message(chat_id, "Сотрудник найден. Введите дату рождения ребёнка",
+                           reply_markup=types.ReplyKeyboardRemove())
 
 
 async def birthday_child_handler(message: types.Message, state: FSMContext):
@@ -186,21 +186,27 @@ async def birthday_child_handler(message: types.Message, state: FSMContext):
                                "\nМеню изменения - /upd_menu" +
                                "\nМеню запросов - /gen_menu\n\nВыйти - /exit", reply_markup=kb_continue)
     else:
-        await bot.send_message(chat_id,
-                               "Дата введена не правильно. Введите дату рождения ребёнка",
+        await bot.send_message(chat_id, f"Дата введена не правильно. {date_rules()}Введите дату рождения ребёнка",
                                reply_markup=types.ReplyKeyboardRemove())
 
 
 async def add_contract_handler(call: types.CallbackQuery, state: FSMContext):
     # await remove_chat_buttons(chat_id)
-    await AddContract.descr.set()
-    await call.message.answer("Введите название и описание контракта", reply_markup=types.ReplyKeyboardRemove())
+    await AddContract.name.set()
+    await call.message.answer("Введите название контракта", reply_markup=types.ReplyKeyboardRemove())
     await call.answer()
 
 
-async def description_contract_handler(message: types.Message, state: FSMContext):
+async def name_contract_handler(message: types.Message, state: FSMContext):
     chat_id = message.chat.id
     # await remove_chat_buttons(chat_id)
+
+    with open(data_name_file, "r+") as file:
+        data = json.load(file)
+        data[f"{chat_id}_add_contract"] = {"name": message.text.strip()}
+        file.close()
+    with open(data_name_file, "w") as file:
+        json.dump(data, file, indent=4)
 
     kb_type_contract = types.ReplyKeyboardMarkup(resize_keyboard=True)
     butts = [types.KeyboardButton("основной"), types.KeyboardButton("дополнительный")]
@@ -216,6 +222,16 @@ async def type_contract_handler(message: types.Message, state: FSMContext):
     chat_id = message.chat.id
     # await remove_chat_buttons(chat_id)
 
+    with open(data_name_file, "r+") as file:
+        data = json.load(file)
+        if message.text.strip().lower() == "основной":
+            data[f"{chat_id}_add_contract"]["type"] = True
+        else:
+            data[f"{chat_id}_add_contract"]["type"] = False
+        file.close()
+    with open(data_name_file, "w") as file:
+        json.dump(data, file, indent=4)
+
     await AddContract.next()
 
     await bot.send_message(chat_id, "Введите дату начала контракта", reply_markup=types.ReplyKeyboardRemove())
@@ -224,28 +240,71 @@ async def type_contract_handler(message: types.Message, state: FSMContext):
 async def start_contract_date_handler(message: types.Message, state: FSMContext):
     chat_id = message.chat.id
     # await remove_chat_buttons(chat_id)
+    if check_date(message.text.strip()):
+        with open(data_name_file, "r+") as file:
+            data = json.load(file)
+            date = list(map(int, message.text.split('.')))
+            data[f"{chat_id}_add_contract"]["date_start"] = date
+            file.close()
+        with open(data_name_file, "w") as file:
+            json.dump(data, file, indent=4)
 
-    await AddContract.next()
-
-    await bot.send_message(chat_id, "Введите дату окончания контракта", reply_markup=types.ReplyKeyboardRemove())
+        await AddContract.next()
+        await bot.send_message(chat_id, "Введите дату окончания контракта (она должна быть больше даты начала)",
+                               reply_markup=types.ReplyKeyboardRemove())
+    else:
+        await bot.send_message(chat_id, f"Дата введена не правильно. {date_rules()}Введите дату начала контракта",
+                               reply_markup=types.ReplyKeyboardRemove())
 
 
 async def end_contract_date_handler(message: types.Message, state: FSMContext):
     chat_id = message.chat.id
     # await remove_chat_buttons(chat_id)
 
-    kb_continue = types.InlineKeyboardMarkup(resize_keyboard=True)
-    butts = types.InlineKeyboardButton(text="Продолжить", callback_data="add_contract")
-    kb_continue.add(butts)
+    if check_date(message.text.strip()):
+        with open(data_name_file, "r+") as file:
+            data = json.load(file)
+            date = list(map(int, message.text.split('.')))
+            data[f"{chat_id}_add_contract"]["date_end"] = date
 
-    await state.finish()
-    await AdminStatus.authorized.set()
+            name = data[f"{chat_id}_add_contract"]["name"].strip()
+            date_start = data[f"{chat_id}_add_contract"]["date_start"]
+            date_start = datetime.date(date_start[2], date_start[1], date_start[0])
+            date_end = data[f"{chat_id}_add_contract"]["date_end"]
+            date_end = datetime.date(date_end[2], date_end[1], date_end[0])
 
-    await bot.send_message(chat_id, "Принято. Хотите добавить ещё один контракт?\nМеню - /start_menu" +
-                           "\nМеню добавления - /add_menu" +
-                           "\nМеню удаления - /del_menu" +
-                           "\nМеню изменения - /upd_menu" +
-                           "\nМеню запросов - /gen_menu\n\nВыйти - /exit", reply_markup=kb_continue)
+            duration = dif_date(date_start, date_end)
+            if duration[0] < 0 or duration[1] < 0 or duration[2] < 0:
+                await bot.send_message(chat_id,
+                                       f"Дата введена не правильно. {date_rules()}Введите дату окончания контракта (она должна быть больше даты начала)",
+                                       reply_markup=types.ReplyKeyboardRemove())
+                return
+
+            type_c = ContractTypes.main if data[f"{chat_id}_add_contract"]["type"] else ContractTypes.addition
+            contract = Contract(name=name, type=type_c, start_date=date_start, end_date=date_end)
+            session.add(contract)
+            session.commit()
+
+            del (data[f"{chat_id}_add_contract"])
+            file.close()
+        with open(data_name_file, "w") as file:
+            json.dump(data, file, indent=4)
+
+        kb_continue = types.InlineKeyboardMarkup(resize_keyboard=True)
+        butts = types.InlineKeyboardButton(text="Продолжить", callback_data="add_contract")
+        kb_continue.add(butts)
+
+        await state.finish()
+        await AdminStatus.authorized.set()
+
+        await bot.send_message(chat_id, "Принято. Хотите добавить ещё один контракт?\nМеню - /start_menu" +
+                               "\nМеню добавления - /add_menu" +
+                               "\nМеню удаления - /del_menu" +
+                               "\nМеню изменения - /upd_menu" +
+                               "\nМеню запросов - /gen_menu\n\nВыйти - /exit", reply_markup=kb_continue)
+    else:
+        await bot.send_message(chat_id, f"Дата введена не правильно. {date_rules()}Введите дату окончания контракта",
+                               reply_markup=types.ReplyKeyboardRemove())
 
 
 async def add_employee_to_position_handler(call: types.CallbackQuery, state: FSMContext):
@@ -310,12 +369,12 @@ async def wage_employee_position_handler(message: types.Message, state: FSMConte
 
 async def add_position_handler(call: types.CallbackQuery, state: FSMContext):
     # await remove_chat_buttons(chat_id)
-    await AddPosition.descr.set()
+    await AddPosition.name.set()
     await call.message.answer("Введите название должности", reply_markup=types.ReplyKeyboardRemove())
     await call.answer()
 
 
-async def description_position_handler(message: types.Message, state: FSMContext):
+async def name_position_handler(message: types.Message, state: FSMContext):
     chat_id = message.chat.id
     # await remove_chat_buttons(chat_id)
 
@@ -385,7 +444,7 @@ async def type_award_handler(message: types.Message, state: FSMContext):
                            reply_markup=types.ReplyKeyboardRemove())
 
 
-async def description_award_handler(message: types.Message, state: FSMContext):
+async def name_award_handler(message: types.Message, state: FSMContext):
     chat_id = message.chat.id
     # await remove_chat_buttons(chat_id)
 
@@ -472,7 +531,7 @@ def register_handlers_add(dp: Dispatcher):
 
     dp.register_callback_query_handler(add_contract_handler, lambda call: call.data == "add_contract",
                                        state=AdminStatus.authorized)
-    dp.register_message_handler(description_contract_handler, state=AddContract.descr)
+    dp.register_message_handler(name_contract_handler, state=AddContract.name)
     dp.register_message_handler(type_contract_handler, state=AddContract.type)
     dp.register_message_handler(start_contract_date_handler, state=AddContract.date_start)
     dp.register_message_handler(end_contract_date_handler, state=AddContract.date_end)
@@ -487,7 +546,7 @@ def register_handlers_add(dp: Dispatcher):
 
     dp.register_callback_query_handler(add_position_handler, lambda call: call.data == "add_position",
                                        state=AdminStatus.authorized)
-    dp.register_message_handler(description_position_handler, state=AddPosition.descr)
+    dp.register_message_handler(name_position_handler, state=AddPosition.name)
     dp.register_message_handler(contract_position_handler, state=AddPosition.name_contract)
     dp.register_message_handler(wage_position_handler, state=AddPosition.wage)
     dp.register_message_handler(number_stuff_position_handler, state=AddPosition.num_stuff)
@@ -495,7 +554,7 @@ def register_handlers_add(dp: Dispatcher):
     dp.register_callback_query_handler(add_award_handler, lambda call: call.data == "add_award",
                                        state=AdminStatus.authorized)
     dp.register_message_handler(type_award_handler, state=AddAward.type)
-    dp.register_message_handler(description_award_handler, state=AddAward.descr)
+    dp.register_message_handler(name_award_handler, state=AddAward.name)
     dp.register_message_handler(award_cost_handler, state=AddAward.cost)
 
     dp.register_callback_query_handler(add_award_to_employee_handler, lambda call: call.data == "add_award_to_employee",
