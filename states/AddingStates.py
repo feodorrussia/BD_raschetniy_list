@@ -11,7 +11,7 @@ class AddChild(StatesGroup):
     birthday = State()
 
 class AddContract(StatesGroup):
-    descr = State()
+    name = State()
     type = State()
     date_start = State()
     date_end = State()
@@ -23,14 +23,14 @@ class AddEmployeeToContract(StatesGroup):
     rate = State()
 
 class AddPosition(StatesGroup):
-    descr = State()
+    name = State()
     name_contract = State()
     wage = State()
     num_stuff = State()
 
 class AddAward(StatesGroup):
     type = State()
-    descr = State()
+    name = State()
     cost = State()
 
 class AddAwardToEmployee(StatesGroup):
