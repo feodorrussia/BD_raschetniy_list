@@ -19,8 +19,16 @@ async def add_employee_handler(call: types.CallbackQuery, state: FSMContext):
 async def name_employee_handler(message: types.Message, state: FSMContext):
     chat_id = message.chat.id
     # await remove_chat_buttons(chat_id)
+
+    with open(data_name_file, "r+") as file:
+        data = json.load(file)
+        data[f"{chat_id}_add_employee"] = {"name": message.text.strip()}
+        file.close()
     with open(data_name_file, "w") as file:
-        json.dump({f"{chat_id}_add_employee": {"name": message.text.strip()}}, file, ensure_ascii=True)
+        json.dump(data, file, indent=4)
+
+    with open(data_name_file, "w") as file:
+        json.dump(data, file, ensure_ascii=True)
     await AddEmployee.next()
     await bot.send_message(chat_id,
                            "Введите дату найма нового сотрудника?\n(если сотрудник нанят сегодня, то введите, пожалуйста, сегодняшнюю дату)",
@@ -39,7 +47,7 @@ async def date_hire_employee_handler(message: types.Message, state: FSMContext):
             data = json.load(file)
             date = list(map(int, message.text.split('.')))
             data[f"{chat_id}_add_employee"]["date_hire"] = date
-            print(data[f"{chat_id}_add_employee"]["name"])
+            # print(data[f"{chat_id}_add_employee"]["name"])
             file.close()
         with open(data_name_file, "w") as file:
             json.dump(data, file, indent=4)
@@ -67,7 +75,7 @@ async def gender_employee_handler(message: types.Message, state: FSMContext):
 
         name = data[f"{chat_id}_add_employee"]["name"].strip().split()
         date_hire = data[f"{chat_id}_add_employee"]["date_hire"]
-        gender = Gender.male if data[f"{chat_id}_add_employee"]["gender"] else Gender.female
+        gender = Gender.female if data[f"{chat_id}_add_employee"]["gender"] else Gender.male
         employee = Employee(firstname=name[0], lastname=name[1], middlename=None if len(name) < 3 else name[2],
                             gender=gender, date_hired=datetime.date(date_hire[2], date_hire[1], date_hire[0]))
         session.add(employee)
@@ -75,13 +83,13 @@ async def gender_employee_handler(message: types.Message, state: FSMContext):
 
         del (data[f"{chat_id}_add_employee"])
 
-        data[f"{chat_id}_add_child"] = {"name_parent_id": session.query(Employee).filter_by(firstname=name[0],
-                                                                                            lastname=name[1],
-                                                                                            date_hired=datetime.date(
-                                                                                                date_hire[2],
-                                                                                                date_hire[1],
-                                                                                                date_hire[0]),
-                                                                                            gender=gender).first().id}
+        data[f"{chat_id}_add_child"] = {"parent_id": session.query(Employee).filter_by(firstname=name[0],
+                                                                                       lastname=name[1],
+                                                                                       date_hired=datetime.date(
+                                                                                           date_hire[2],
+                                                                                           date_hire[1],
+                                                                                           date_hire[0]),
+                                                                                       gender=gender).first().id}
         file.close()
     with open(data_name_file, "w") as file:
         json.dump(data, file, indent=4)
@@ -99,7 +107,7 @@ async def children_employee_handler(message: types.Message, state: FSMContext):
     if check_date(message.text.strip()):
         with open(data_name_file, "r+") as file:
             data = json.load(file)
-            employee_id = data[f"{chat_id}_add_child"]["name_parent_id"]
+            employee_id = data[f"{chat_id}_add_child"]["parent_id"]
 
             date = list(map(int, message.text.split('.')))
             child = Child(id_employee=employee_id, birthday=datetime.date(date[2], date[1], date[0]))
@@ -130,28 +138,57 @@ async def name_parent_handler(message: types.Message, state: FSMContext):
     chat_id = message.chat.id
     # await remove_chat_buttons(chat_id)
 
+    with open(data_name_file, "r+") as file:
+        data = json.load(file)
+        name = message.text.strip().split()
+        employees = session.query(Employee).filter_by(firstname=name[0], lastname=name[1]).all()
+        if len(employees) > 0:
+            data[f"{chat_id}_add_child"] = {"parent_id": employees[0].id}
+        else:
+            await bot.send_message(chat_id, "Сотрудник не найден. Введите ФИО сотрудника\n" +
+                                            "Список сотрудников - /employees", reply_markup=types.ReplyKeyboardRemove())
+            return
+        file.close()
+    with open(data_name_file, "w") as file:
+        json.dump(data, file, indent=4)
+
     await AddChild.next()
 
-    await bot.send_message(chat_id, "Введите дату рождения ребёнка", reply_markup=types.ReplyKeyboardRemove())
+    await bot.send_message(chat_id, "Сотрудник найден. Введите дату рождения ребёнка", reply_markup=types.ReplyKeyboardRemove())
 
 
 async def birthday_child_handler(message: types.Message, state: FSMContext):
     chat_id = message.chat.id
     # await remove_chat_buttons(chat_id)
 
-    kb_continue = types.InlineKeyboardMarkup(resize_keyboard=True)
-    butts = types.InlineKeyboardButton(text="Продолжить", callback_data="add_child")
-    kb_continue.add(butts)
+    if check_date(message.text.strip()):
+        with open(data_name_file, "r+") as file:
+            data = json.load(file)
+            employee_id = data[f"{chat_id}_add_child"]["parent_id"]
 
-    await state.finish()
-    await AdminStatus.authorized.set()
+            date = list(map(int, message.text.split('.')))
+            child = Child(id_employee=employee_id, birthday=datetime.date(date[2], date[1], date[0]))
+            session.add(child)
+            session.commit()
+            file.close()
 
-    await bot.send_message(chat_id, "Принято. Хотите добавить ещё одного ребёнка?" +
-                           "\nМеню - /start_menu" +
-                           "\nМеню добавления - /add_menu" +
-                           "\nМеню удаления - /del_menu" +
-                           "\nМеню изменения - /upd_menu" +
-                           "\nМеню запросов - /gen_menu\n\nВыйти - /exit", reply_markup=kb_continue)
+        kb_continue = types.InlineKeyboardMarkup(resize_keyboard=True)
+        butts = types.InlineKeyboardButton(text="Продолжить", callback_data="add_child")
+        kb_continue.add(butts)
+
+        await state.finish()
+        await AdminStatus.authorized.set()
+
+        await bot.send_message(chat_id, "Принято. Хотите добавить ещё одного ребёнка?" +
+                               "\nМеню - /start_menu" +
+                               "\nМеню добавления - /add_menu" +
+                               "\nМеню удаления - /del_menu" +
+                               "\nМеню изменения - /upd_menu" +
+                               "\nМеню запросов - /gen_menu\n\nВыйти - /exit", reply_markup=kb_continue)
+    else:
+        await bot.send_message(chat_id,
+                               "Дата введена не правильно. Введите дату рождения ребёнка",
+                               reply_markup=types.ReplyKeyboardRemove())
 
 
 async def add_contract_handler(call: types.CallbackQuery, state: FSMContext):
