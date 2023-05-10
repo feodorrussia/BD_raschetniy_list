@@ -1,10 +1,11 @@
 from aiogram import types, Dispatcher
-from create_bot import bot
+from create_bot import *
 from keyboards.keyboards import kb_cancel
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from states.GeneratingStates import *
 from states.AdminStatus import AdminStatus
+from other.functions import *
 
 
 async def generate_list_vacancy_handler(call: types.CallbackQuery, state: FSMContext):
@@ -142,6 +143,80 @@ async def output_list_employee_profit_handler(message: types.Message, state: FSM
                            "\nМеню запросов - /gen_menu\n\nВыйти - /exit", reply_markup=types.ReplyKeyboardRemove())
 
 
+async def generate_employee_list_handler(call: types.CallbackQuery, state: FSMContext):
+    # await remove_chat_buttons(chat_id)
+    # await GenerateWarning.name_employee.set()
+
+    await state.finish()
+    await AdminStatus.authorized.set()
+
+    employees = session.query(Employee).all()
+
+    await call.message.answer(generate_employee_list(employees))
+    await call.message.answer("\n\nМеню - /start_menu" +
+                              "\nМеню добавления - /add_menu" +
+                              "\nМеню удаления - /del_menu" +
+                              "\nМеню изменения - /upd_menu" +
+                              "\nМеню запросов - /gen_menu\n\nВыйти - /exit",
+                              reply_markup=types.ReplyKeyboardRemove())
+    await call.answer()
+
+
+async def generate_employee_list_message_handler(message: types.Message, state: FSMContext):
+    # await remove_chat_buttons(chat_id)
+    # await GenerateWarning.name_employee.set()
+
+    await state.finish()
+    await AdminStatus.authorized.set()
+
+    employees = session.query(Employee).all()
+
+    await bot.send_message(message.chat.id, generate_employee_list(employees))
+    await bot.send_message(message.chat.id, "\n\nМеню - /start_menu" +
+                           "\nМеню добавления - /add_menu" +
+                           "\nМеню удаления - /del_menu" +
+                           "\nМеню изменения - /upd_menu" +
+                           "\nМеню запросов - /gen_menu\n\nВыйти - /exit",
+                           reply_markup=types.ReplyKeyboardRemove())
+
+
+async def generate_award_list_handler(call: types.CallbackQuery, state: FSMContext):
+    # await remove_chat_buttons(chat_id)
+    # await GenerateWarning.name_employee.set()
+
+    await state.finish()
+    await AdminStatus.authorized.set()
+
+    awards = session.query(Award).all()
+
+    await call.message.answer(generate_award_list(awards))
+    await call.message.answer("\n\nМеню - /start_menu" +
+                              "\nМеню добавления - /add_menu" +
+                              "\nМеню удаления - /del_menu" +
+                              "\nМеню изменения - /upd_menu" +
+                              "\nМеню запросов - /gen_menu\n\nВыйти - /exit",
+                              reply_markup=types.ReplyKeyboardRemove())
+    await call.answer()
+
+
+async def generate_award_list_message_handler(message: types.Message, state: FSMContext):
+    # await remove_chat_buttons(chat_id)
+    # await GenerateWarning.name_employee.set()
+
+    await state.finish()
+    await AdminStatus.authorized.set()
+
+    awards = session.query(Award).all()
+
+    await bot.send_message(message.chat.id, generate_award_list(awards))
+    await bot.send_message(message.chat.id, "\n\nМеню - /start_menu" +
+                           "\nМеню добавления - /add_menu" +
+                           "\nМеню удаления - /del_menu" +
+                           "\nМеню изменения - /upd_menu" +
+                           "\nМеню запросов - /gen_menu\n\nВыйти - /exit",
+                           reply_markup=types.ReplyKeyboardRemove())
+
+
 def register_handlers_generate(dp: Dispatcher):
     dp.register_callback_query_handler(generate_list_vacancy_handler, lambda call: call.data == "gen_vacancy",
                                        state=AdminStatus.authorized)
@@ -153,6 +228,18 @@ def register_handlers_generate(dp: Dispatcher):
     # dp.register_message_handler(output_list_profits_handler, state=GenerateProfit.name_employee)
 
     dp.register_callback_query_handler(generate_list_warning_handler, lambda call: call.data == "gen_warning",
+                                       state=AdminStatus.authorized)
+
+    dp.register_callback_query_handler(generate_employee_list_handler, lambda call: call.data == "gen_employee_list",
+                                       state=AdminStatus.authorized)
+
+    dp.register_message_handler(generate_employee_list_message_handler, commands=['employees'],
+                                       state=AdminStatus.authorized)
+
+    dp.register_callback_query_handler(generate_award_list_handler, lambda call: call.data == "gen_award_list",
+                                       state=AdminStatus.authorized)
+
+    dp.register_message_handler(generate_award_list_message_handler, commands=['awards'],
                                        state=AdminStatus.authorized)
 
     dp.register_callback_query_handler(generate_list_employee_profit_handler,
