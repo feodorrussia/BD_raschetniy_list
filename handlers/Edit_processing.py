@@ -7,21 +7,6 @@ from states.EditingStates import *
 from states.AdminStatus import AdminStatus
 
 
-async def edit_employee_handler(call: types.CallbackQuery, state: FSMContext):
-    # await remove_chat_buttons(chat_id)
-    await EditEmployee.name_employee.set()
-    await call.message.answer("Введите ФИО сотрудника", reply_markup=types.ReplyKeyboardRemove())
-    await call.answer()
-
-
-async def edit_child_handler(call: types.CallbackQuery, state: FSMContext):
-    # await remove_chat_buttons(chat_id)
-    await EditChild.name_employee.set()
-
-    await call.message.answer("Введите ФИО сотрудника", reply_markup=types.ReplyKeyboardRemove())
-    await call.answer()
-
-
 async def edit_rate_employee_handler(call: types.CallbackQuery, state: FSMContext):  # Important!!!
     # await remove_chat_buttons(chat_id)
     await EditRate.name_employee.set()
@@ -75,56 +60,9 @@ async def update_rate_handler(message: types.Message, state: FSMContext):
                            "\nМеню запросов - /gen_menu\n\nВыйти - /exit", reply_markup=kb_continue)
 
 
-async def edit_contract_handler(call: types.CallbackQuery, state: FSMContext):
-    # await remove_chat_buttons(chat_id)
-    await EditContract.name_contract.set()
-    await call.message.answer("Введите название контракта, который хотите изменить",
-                              reply_markup=types.ReplyKeyboardRemove())
-    await call.answer()
-
-
-async def edit_position_handler(call: types.CallbackQuery, state: FSMContext):
-    # await remove_chat_buttons(chat_id)
-    await EditPosition.name_position.set()
-    await call.message.answer("Введите название должности", reply_markup=types.ReplyKeyboardRemove())
-    await call.answer()
-
-
-async def edit_award_handler(call: types.CallbackQuery, state: FSMContext):
-    # await remove_chat_buttons(chat_id)
-    await EditAward.type.set()
-    await call.message.answer("Введите тип (поощрение/штраф)", reply_markup=types.ReplyKeyboardRemove())
-    await call.answer()
-
-
-async def edit_award_employee_handler(call: types.CallbackQuery, state: FSMContext):
-    # await remove_chat_buttons(chat_id)
-    await EditAwardEmployee.name_employee.set()
-    await call.message.answer("Введите ФИО сотрудника", reply_markup=types.ReplyKeyboardRemove())
-    await call.answer()
-
-
 def register_handlers_edit(dp: Dispatcher):
-    dp.register_callback_query_handler(edit_employee_handler, lambda call: call.data == "edit_employee",
-                                       state=AdminStatus.authorized)
-
-    dp.register_callback_query_handler(edit_child_handler, lambda call: call.data == "edit_child",
-                                       state=AdminStatus.authorized)
-
     dp.register_callback_query_handler(edit_rate_employee_handler, lambda call: call.data == "edit_rate",
                                        state=AdminStatus.authorized)
     dp.register_message_handler(name_employee_rate_handler, state=EditRate.name_employee)
     dp.register_callback_query_handler(position_rate_handler, state=EditRate.position)
     dp.register_message_handler(update_rate_handler, state=EditRate.new_value)
-
-    dp.register_callback_query_handler(edit_contract_handler , lambda call: call.data == "edit_contract",
-                                       state=AdminStatus.authorized)
-
-    dp.register_callback_query_handler(edit_position_handler, lambda call: call.data == "edit_position",
-                                       state=AdminStatus.authorized)
-
-    dp.register_callback_query_handler(edit_award_handler, lambda call: call.data == "edit_award",
-                                       state=AdminStatus.authorized)
-
-    dp.register_callback_query_handler(edit_award_employee_handler, lambda call: call.data == "edit_award_employee",
-                                       state=AdminStatus.authorized)
