@@ -83,9 +83,6 @@ async def generate_list_warning_handler(call: types.CallbackQuery, state: FSMCon
     # await remove_chat_buttons(chat_id)
     # await GenerateWarning.name_employee.set()
 
-    await state.finish()
-    await AdminStatus.authorized.set()
-
     list_employees = ["Соломатов Александр Денисович", "Ушкарёв Савва"]
 
     await call.message.answer(
@@ -111,9 +108,6 @@ async def generate_list_employee_profit_handler(call: types.CallbackQuery):
 async def output_list_employee_profit_handler(message: types.Message, state: FSMContext):
     chat_id = message.chat.id
     # await remove_chat_buttons(chat_id)
-
-    await state.finish()
-    await AdminStatus.authorized.set()
 
     list_pays = [["Соломатов Александр Денисович", -1000], ["Щтраф", "Опоздание", -1000], ["Поощрение", "Жив", 0]]
 
@@ -147,9 +141,6 @@ async def generate_employee_list_handler(call: types.CallbackQuery, state: FSMCo
     # await remove_chat_buttons(chat_id)
     # await GenerateWarning.name_employee.set()
 
-    await state.finish()
-    await AdminStatus.authorized.set()
-
     employees = session.query(Employee).all()
 
     await call.message.answer(generate_employee_list(employees))
@@ -166,9 +157,6 @@ async def generate_employee_list_message_handler(message: types.Message, state: 
     # await remove_chat_buttons(chat_id)
     # await GenerateWarning.name_employee.set()
 
-    await state.finish()
-    await AdminStatus.authorized.set()
-
     employees = session.query(Employee).all()
 
     await bot.send_message(message.chat.id, generate_employee_list(employees))
@@ -183,9 +171,6 @@ async def generate_employee_list_message_handler(message: types.Message, state: 
 async def generate_award_list_handler(call: types.CallbackQuery, state: FSMContext):
     # await remove_chat_buttons(chat_id)
     # await GenerateWarning.name_employee.set()
-
-    await state.finish()
-    await AdminStatus.authorized.set()
 
     awards = session.query(Award).all()
 
@@ -203,9 +188,6 @@ async def generate_award_list_message_handler(message: types.Message, state: FSM
     # await remove_chat_buttons(chat_id)
     # await GenerateWarning.name_employee.set()
 
-    await state.finish()
-    await AdminStatus.authorized.set()
-
     awards = session.query(Award).all()
 
     await bot.send_message(message.chat.id, generate_award_list(awards))
@@ -219,29 +201,29 @@ async def generate_award_list_message_handler(message: types.Message, state: FSM
 
 def register_handlers_generate(dp: Dispatcher):
     dp.register_callback_query_handler(generate_list_vacancy_handler, lambda call: call.data == "gen_vacancy",
-                                       state=AdminStatus.authorized)
+                                       state="*")
     dp.register_callback_query_handler(generate_list_vacancy_doc_handler, lambda call: call.data == "gen_doc_vac",
-                                       state=AdminStatus.authorized)
+                                       state="*")
 
     dp.register_callback_query_handler(generate_list_profits_handler, lambda call: call.data == "gen_profit",
-                                       state=AdminStatus.authorized)
+                                       state="*")
     # dp.register_message_handler(output_list_profits_handler, state=GenerateProfit.name_employee)
 
     dp.register_callback_query_handler(generate_list_warning_handler, lambda call: call.data == "gen_warning",
-                                       state=AdminStatus.authorized)
+                                       state="*")
 
     dp.register_callback_query_handler(generate_employee_list_handler, lambda call: call.data == "gen_employee_list",
-                                       state=AdminStatus.authorized)
+                                       state="*")
 
     dp.register_message_handler(generate_employee_list_message_handler, commands=['employees'],
-                                       state=AdminStatus.authorized)
+                                       state="*")
 
     dp.register_callback_query_handler(generate_award_list_handler, lambda call: call.data == "gen_award_list",
-                                       state=AdminStatus.authorized)
+                                       state="*")
 
     dp.register_message_handler(generate_award_list_message_handler, commands=['awards'],
-                                       state=AdminStatus.authorized)
+                                       state="*")
 
     dp.register_callback_query_handler(generate_list_employee_profit_handler,
-                                       lambda call: call.data == "gen_employee_profit", state=AdminStatus.authorized)
+                                       lambda call: call.data == "gen_employee_profit", state="*")
     dp.register_message_handler(output_list_employee_profit_handler, state=GenerateEmployeeProfit.name_employee)
