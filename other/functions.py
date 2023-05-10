@@ -19,14 +19,16 @@ def check_date(date):
                         return True
     return False
 
+
 def dif_date(date1, date2):
     exp = [date2.year - date1.year, date2.month - date1.month, date2.day - date1.day]
 
     exp[1] += - 1 if exp[2] < 0 else 0
     exp[0] += -1 if exp[1] < 0 else 0
     exp[1] = (12 + exp[1]) % 12
-    exp[2] = (date2 - datetime.date(date2.year - (0 if 12 > date2.month - 1 > 0 else 1), (12 + date2.month - 2) % 12 + 1,
-                                   date1.day)).days
+    exp[2] = (date2 - datetime.date(date2.year - (0 if 12 > date2.month - 1 > 0 else 1),
+                                    (12 + date2.month - 2) % 12 + 1,
+                                    date1.day)).days
     # print(exp)
     return exp
 
@@ -50,11 +52,15 @@ def generate_award_list(awards):
 
 def generate_contract_list(contracts):
     if len(contracts) > 0:
-        return "Список контрактов:\n" + "\n".join([c.name + " - " + c.type + ": " + c.start_date + " - " + c.end_date for c in
-                                                   contracts])
+        return "Список контрактов:\n" + "\n".join(
+            [f"{c.name} - {'основной' if c.type.name == 'main' else 'дополнительный'}: с {date_to_str(c.start_date)} до {date_to_str(c.end_date)}" for c in
+             contracts])
     else:
         return "Пусто."
 
+
+def date_to_str(date):
+    return str(date.year) + "." + str(date.month) + "." + str(date.day)
 
 def date_rules():
     return "Формат даты ДД.ММ.ГГГГ. Также она не должна быть больше сегодняшней.\n"

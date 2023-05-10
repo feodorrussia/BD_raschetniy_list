@@ -205,7 +205,7 @@ async def generate_contract_list_handler(call: types.CallbackQuery, state: FSMCo
 
     contracts = session.query(Contract).all()
 
-    await call.message.answer(generate_employee_list(contracts))
+    await call.message.answer(generate_contract_list(contracts))
     await call.message.answer("\n\nМеню - /start_menu" +
                               "\nМеню добавления - /add_menu" +
                               "\nМеню удаления - /del_menu" +
@@ -219,9 +219,9 @@ async def generate_contract_list_message_handler(message: types.Message, state: 
     # await remove_chat_buttons(chat_id)
     # await GenerateWarning.name_employee.set()
 
-    contracts = session.query(Employee).all()
+    contracts = session.query(Contract).all()
 
-    await bot.send_message(message.chat.id, generate_employee_list(contracts))
+    await bot.send_message(message.chat.id, generate_contract_list(contracts))
     await bot.send_message(message.chat.id, "\n\nМеню - /start_menu" +
                            "\nМеню добавления - /add_menu" +
                            "\nМеню удаления - /del_menu" +
@@ -255,7 +255,7 @@ def register_handlers_generate(dp: Dispatcher):
 
     dp.register_callback_query_handler(generate_contract_list_handler, lambda call: call.data == "gen_contract_list",
                                        state="*")
-    dp.register_message_handler(generate_award_list_message_handler, commands=['contracts'],
+    dp.register_message_handler(generate_contract_list_message_handler, commands=['contracts'],
                                        state="*")
 
     dp.register_callback_query_handler(generate_list_employee_profit_handler,
