@@ -89,12 +89,12 @@ class Rate(Basic):
 class Position(Basic):
     __tablename__ = 'positions'
 
-    descr = Column(String(250), default=None)
+    name_position = Column(String(250), default=None)
     staff_num = Column(Integer, default=1)
     wage = Column(Float, nullable=False)  # - стандартная ЗП
 
     def info(self):
-        return f"staff_num: {self.type} -- standard wage: {self.wage}{'; description: ' + self.descr if self.descr is not None else ''}"
+        return f"staff_num: {self.type} -- standard wage: {self.wage}{'; description: ' + self.name_position if self.name_position is not None else ''}"
 
 
 class PosContr(Basic):
@@ -118,10 +118,10 @@ class Contract(Basic):
     start_date = Column(Date, default=datetime.datetime.today().date())
     end_date = Column(Date, nullable=False)
     type = Column(Enum(ContractTypes), nullable=False, default=ContractTypes.addition)
-    descr = Column(String(250), default=None)
+    name_contract = Column(String(250), default=None)
 
     def info(self):
-        return f"starts {self.start_date} - ends {self.end_date}{'; description: ' + self.descr if self.descr is not None else ''}"
+        return f"starts {self.start_date} - ends {self.end_date}{'; description: ' + self.name_contract if self.name_contract is not None else ''}"
 
 
 class AwardEvent(Basic):
@@ -144,11 +144,11 @@ class Award(Basic):
     __tablename__ = 'awards & penalties'
 
     type = Column(Enum(AwardTypes), nullable=False, default=AwardTypes.award)
-    descr = Column(String(250), default=None)
+    name_award = Column(String(250), default=None)
     cost = Column(Float, nullable=False)
 
     def info(self):
-        return f"{self.type} sum:{self.sum}{'; description: ' + self.descr if self.descr is not None or self.descr != '' else ''}"
+        return f"{self.type} sum:{self.sum}{'; description: ' + self.name_award if self.name_award is not None or self.name_award != '' else ''}"
 
 
 # if I'll get a free time in the future
