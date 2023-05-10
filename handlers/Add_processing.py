@@ -318,6 +318,20 @@ async def name_employee_position_handler(message: types.Message, state: FSMConte
     chat_id = message.chat.id
     # await remove_chat_buttons(chat_id)
 
+    with open(data_name_file, "r+") as file:
+        data = json.load(file)
+        name = message.text.strip().split()
+        employees = session.query(Employee).filter_by(firstname=name[0], lastname=name[1]).all()
+        if len(employees) > 0:
+            data[f"{chat_id}_add_position_to_employee"] = {"employee_id": employees[0].id}
+        else:
+            await bot.send_message(chat_id, "Сотрудник не найден. Введите ФИО сотрудника\n" +
+                                   "Список сотрудников - /employees", reply_markup=types.ReplyKeyboardRemove())
+            return
+        file.close()
+    with open(data_name_file, "w") as file:
+        json.dump(data, file, indent=4)
+
     await AddEmployeeToContract.next()
 
     await bot.send_message(chat_id, "Введите название контракта",
@@ -327,7 +341,26 @@ async def name_employee_position_handler(message: types.Message, state: FSMConte
 async def name_contract_employee_handler(message: types.Message, state: FSMContext):
     chat_id = message.chat.id
     # await remove_chat_buttons(chat_id)
-    vacancy = [[1, "Programming - 2"], [2, "Math - 1"], [3, "Data engineer - 1"]]
+
+    with open(data_name_file, "r+") as file:
+        data = json.load(file)
+        name = message.text.strip()
+        contracts = session.query(Contract).filter_by(name=name).all()
+        if len(contracts) > 0:
+            data[f"{chat_id}_add_position_to_employee"] = {"contract_id": contracts[0].id}
+        else:
+            await bot.send_message(chat_id, "Контракт не найден. Введите название контракта\n" +
+                                   "Список контрактов - /contracts", reply_markup=types.ReplyKeyboardRemove())
+            return
+
+        vacancy = [[1, "Programming - 2"], [2, "Math - 1"], [3, "Data engineer - 1"]]
+        # vacancy = session.query(PosContr).filter_by(id_contract=contracts[0].id)
+
+        file.close()
+    with open(data_name_file, "w") as file:
+        json.dump(data, file, indent=4)
+
+
 
     kb_vacancies = types.InlineKeyboardMarkup(row_width=1, resize_keyboard=True)
     butts = [types.InlineKeyboardButton(text=rate[1], callback_data=f"add_position_{rate[0]}") for rate in vacancy]
