@@ -17,6 +17,7 @@ buttons_2 = [types.InlineKeyboardButton(text="Сотрудник", callback_data
            types.InlineKeyboardButton(text="Ребёнок сотрудника", callback_data="add_child"),
            types.InlineKeyboardButton(text="Контракт", callback_data="add_contract"),
            types.InlineKeyboardButton(text="Новая должность", callback_data="add_position"),
+           types.InlineKeyboardButton(text="Контракт сотруднику", callback_data="add_contract_to_employee"),
            types.InlineKeyboardButton(text="Новое поощрение/штраф", callback_data="add_award"),
            types.InlineKeyboardButton(text="Поощрение/штраф сотруднику", callback_data="add_award_to_employee")]
 kb_add_def.add(*buttons_2)

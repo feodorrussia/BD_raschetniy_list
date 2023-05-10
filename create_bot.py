@@ -17,3 +17,5 @@ storage = MemoryStorage()
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token="6218189424:AAF4Upm5NsSzYh37T-UCUggbuGwSO5evPG8")  #
 dp = Dispatcher(bot, storage=storage)
+
+data_name_file = "data_file.json"

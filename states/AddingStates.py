@@ -16,8 +16,15 @@ class AddContract(StatesGroup):
     date_start = State()
     date_end = State()
 
+class AddEmployeeToContract(StatesGroup):
+    name_employee = State()
+    name_contract = State()
+    position = State()
+    rate = State()
+
 class AddPosition(StatesGroup):
     descr = State()
+    name_contract = State()
     wage = State()
     num_stuff = State()
 
