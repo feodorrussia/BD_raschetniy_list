@@ -9,7 +9,7 @@ from states.AdminStatus import AdminStatus
 # @dp.message_handler(commands=['start'])
 async def process_start_command(message: types.Message):
     await AdminStatus.unauthorized.set()
-    await message.reply(f"Здравствуй, {message.from_user.first_name}\n(Будь паинькой, скажи привет)\n\nАвторизоваться - /admin")
+    await message.reply(f"Здравствуй, {message.from_user.first_name}\n\nАвторизоваться - /admin")
 
 
 # @dp.message_handler()
@@ -22,16 +22,17 @@ async def echo(message: types.Message):
 async def authorizing_handler(message: types.Message, state : FSMContext):
     chat_id = message.chat.id
     await AdminStatus.authorizing.set()
-    await bot.send_message(chat_id, "Если ты админ, скажи да (именно так)")
+    await bot.send_message(chat_id, "Введи пароль")
 
 
 async def authorization_handler(message: types.Message, state: FSMContext):
     chat_id = message.chat.id
+    print(hash("пароль"))
     if hash(message.text) == hash("да"):
         await AdminStatus.authorized.set()
         await bot.send_message(chat_id, "Здравствуйте, Барин. Чего изволите?", reply_markup=kb_admin_def)
     else:
-        await bot.send_message(chat_id, "Неверный ответ, сударь. Извольте ещё раз.")
+        await bot.send_message(chat_id, "Неверный ответ, сударь. Изволь ещё раз.")
 
 
 

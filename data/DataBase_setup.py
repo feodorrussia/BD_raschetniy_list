@@ -39,6 +39,8 @@ class Employee(Basic):
         return (
             (self.date_fired - self.date_hired) if self.date_fired is not None else (datetime.datetime.today().date() - self.date_hired)).days
 
+    def get_name(self):
+        return f"{self.firstname} {self.lastname}{(' ' + self.middlename) if self.middlename is not None else ''}"
     def getExperience_to_str(self):
         date = self.date_fired if self.date_fired is not None else datetime.datetime.today().date()
         exp = [date.year - self.date_hired.year, date.month - self.date_hired.month, date.day - self.date_hired.day]
@@ -123,6 +125,15 @@ class Contract(Basic):
     def get_status(self):
         return (self.end_date - datetime.datetime.today().date()).days > 0
 
+    def get_duration(self):
+        if self.end_date > datetime.datetime.today().date():
+            return (self.start_date - datetime.datetime.today().date()).days
+        else:
+            return (self.start_date - self.end_date).days
+
+    def get_type(self):
+        return 'основной' if self.type.name == 'main' else 'дополнительный'
+
     def info(self):
         return f"starts {self.start_date} - ends {self.end_date}{'; name: ' + self.name if self.name is not None else ''}"
 
@@ -133,6 +144,12 @@ class AwardEvent(Basic):
     id_employee = Column(Integer, nullable=False)
     id_award = Column(Integer, nullable=False)
     date = Column(Date, nullable=False)
+
+    def get_year(self):
+        return self.date.year
+
+    def is_this_year(self):
+        return self.date.year == datetime.datetime.today().date().year
 
     def info(self):
         return f"{self.date}: employee id {self.id_employee} -- award id {self.id_award}"

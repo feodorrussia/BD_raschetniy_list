@@ -54,8 +54,8 @@ def generate_award_list(awards):
 def generate_contract_list(contracts):
     contracts = list(filter(lambda x: x.get_status(), contracts))
     if len(contracts) > 0:
-        return "Список контрактов:\n" + "\n".join(
-            [f"{c.name} - {'основной' if c.type.name == 'main' else 'дополнительный'}: с {date_to_str(c.start_date)} до {date_to_str(c.end_date)}" for c in
+        return "Список активных контрактов:\n" + "\n".join(
+            [f"{c.name} - {c.get_type()}: с {date_to_str(c.start_date)} до {date_to_str(c.end_date)}" for c in
              contracts])
     else:
         return "Активных нет."

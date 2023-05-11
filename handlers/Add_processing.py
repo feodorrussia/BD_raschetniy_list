@@ -364,7 +364,7 @@ async def name_position_handler(message: types.Message, state: FSMContext):
 
     await AddPosition.next()
 
-    await bot.send_message(chat_id, "Введите зарплату сотрудника на этой должности",
+    await bot.send_message(chat_id, "Введите зарплату сотрудника в месяц на этой должности",
                            reply_markup=types.ReplyKeyboardRemove())
 
 
@@ -464,7 +464,7 @@ async def id_employee_position_handler(message: types.Message, state: FSMContext
 
     await AddEmployeeToContract.next()
 
-    await bot.send_message(chat_id, "Введите название контракта\nСписок активных контрактов - /contracts",
+    await bot.send_message(chat_id, " Введите ФИО сотрудника\nСписок сотрудников - /employees",
                            reply_markup=types.ReplyKeyboardRemove())
 
 
@@ -625,7 +625,7 @@ async def wage_employee_position_handler(message: types.Message, state: FSMConte
         json.dump(data, file, indent=4)
 
     kb_continue = types.InlineKeyboardMarkup(resize_keyboard=True)
-    butts = types.InlineKeyboardButton(text="Продолжить", callback_data="add_position")
+    butts = types.InlineKeyboardButton(text="Продолжить", callback_data="add_contract_to_employee")
     kb_continue.add(butts)
 
     await state.finish()
