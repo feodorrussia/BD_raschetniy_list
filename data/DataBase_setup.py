@@ -37,7 +37,7 @@ class Employee(Basic):
 
     def getExperience_inDays(self):
         return (
-            self.date_fired if self.date_fired is not None else datetime.datetime.today().date() - self.date_hired).days
+            (self.date_fired - self.date_hired) if self.date_fired is not None else (datetime.datetime.today().date() - self.date_hired)).days
 
     def getExperience_to_str(self):
         date = self.date_fired if self.date_fired is not None else datetime.datetime.today().date()
@@ -119,6 +119,9 @@ class Contract(Basic):
     end_date = Column(Date, nullable=False)
     type = Column(Enum(ContractTypes), nullable=False, default=ContractTypes.addition)
     name = Column(String(250), default=None)
+
+    def get_status(self):
+        return ((self.end_date - self.start_date) if self.end_date is not None else (datetime.datetime.today().date() - self.start_date)).days > 0
 
     def info(self):
         return f"starts {self.start_date} - ends {self.end_date}{'; description: ' + self.name if self.name is not None else ''}"

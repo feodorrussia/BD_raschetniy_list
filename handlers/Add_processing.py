@@ -129,7 +129,7 @@ async def children_employee_handler(message: types.Message, state: FSMContext):
 async def add_child_handler(call: types.CallbackQuery, state: FSMContext):
     # await remove_chat_buttons(chat_id)
     await AddChild.name_employee.set()
-    await call.message.answer("Введите ФИО сотрудника", reply_markup=types.ReplyKeyboardRemove())
+    await call.message.answer("Введите ФИО сотрудника\nСписок сотрудников - /employees", reply_markup=types.ReplyKeyboardRemove())
     await call.answer()
 
 
@@ -429,7 +429,7 @@ async def number_stuff_position_handler(message: types.Message, state: FSMContex
 async def add_employee_to_position_handler(call: types.CallbackQuery, state: FSMContext):
     # await remove_chat_buttons(chat_id)
     await AddEmployeeToContract.id_employee.set()
-    await call.message.answer("Введите ФИО сотрудника", reply_markup=types.ReplyKeyboardRemove())
+    await call.message.answer("Введите ФИО сотрудника\nСписок сотрудников - /employees", reply_markup=types.ReplyKeyboardRemove())
     await call.answer()
 
 
@@ -453,7 +453,7 @@ async def id_employee_position_handler(message: types.Message, state: FSMContext
 
     await AddEmployeeToContract.next()
 
-    await bot.send_message(chat_id, "Введите название контракта",
+    await bot.send_message(chat_id, "Введите название контракта\nСписок активных контрактов - /contracts",
                            reply_markup=types.ReplyKeyboardRemove())
 
 
@@ -466,10 +466,15 @@ async def id_contract_employee_handler(message: types.Message, state: FSMContext
         name = message.text.strip()
         contracts = session.query(Contract).filter_by(name=name).all()
         if len(contracts) > 0:
-            data[f"{chat_id}_add_position_to_employee"]["contract_id"] = contracts[0].id
+            if contracts[0].get_status():
+                data[f"{chat_id}_add_position_to_employee"]["contract_id"] = contracts[0].id
+            else:
+                await bot.send_message(chat_id, "Контракт завершён, добавить сотрудника нельзя. Введите название другого контракта\n" +
+                                       "Список активных контрактов - /contracts", reply_markup=types.ReplyKeyboardRemove())
+                return
         else:
             await bot.send_message(chat_id, "Контракт не найден. Введите название контракта\n" +
-                                   "Список контрактов - /contracts", reply_markup=types.ReplyKeyboardRemove())
+                                   "Список активных контрактов - /contracts", reply_markup=types.ReplyKeyboardRemove())
             return
 
         # vacancy = [[1, "Programming - 2"], [2, "Math - 1"], [3, "Data engineer - 1"]]
@@ -815,8 +820,12 @@ async def date_award_handler(message: types.Message, state: FSMContext):
                                "\nМеню изменения - /upd_menu" +
                                "\nМеню запросов - /gen_menu\n\nВыйти - /exit", reply_markup=kb_continue)
     else:
-        await bot.send_message(chat_id, f"Дата введена не правильно. {date_rules()}Введите дату начала контракта",
+        with open(data_name_file, "r+") as file:
+            data = json.load(file)
+            award = session.query(Award).filter_by(id=data[f"{chat_id}_add_award_to_employee"]["award_id"]).first()
+            await bot.send_message(chat_id, f"Дата введена не правильно. {date_rules()}Введите дату {'поощрения' if award.type.name == 'award' else 'штрафа'}",
                                reply_markup=types.ReplyKeyboardRemove())
+            file.close()
 
 
 def register_handlers_add(dp: Dispatcher):

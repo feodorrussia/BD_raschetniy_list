@@ -35,7 +35,7 @@ def dif_date(date1, date2):
 
 def generate_employee_list(employees):
     if len(employees) > 0:
-        return "Список сотрудников:\n" + "\n".join([f"{e.firstname} {e.lastname} {'' if e.middlename is None else e.middlename}, стаж - {e.getExperience_to_str()}" for e in employees])
+        return "Список сотрудников:\n" + "\n".join([f"{e.firstname} {e.lastname} {'' if e.middlename is None else e.middlename}\n\t\t- Стаж - {e.getExperience_to_str()}\n\t\t- Статус - {'нанят' if e.date_fired is None else 'уволен'}" for e in employees])
     else:
         return "Пусто."
 
@@ -55,7 +55,7 @@ def generate_contract_list(contracts):
     if len(contracts) > 0:
         return "Список контрактов:\n" + "\n".join(
             [f"{c.name} - {'основной' if c.type.name == 'main' else 'дополнительный'}: с {date_to_str(c.start_date)} до {date_to_str(c.end_date)}" for c in
-             contracts])
+             list(filter(lambda x: x.get_status(), contracts))])
     else:
         return "Пусто."
 

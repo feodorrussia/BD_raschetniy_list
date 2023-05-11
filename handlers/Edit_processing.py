@@ -1,23 +1,44 @@
 from aiogram import types, Dispatcher
-from create_bot import bot
+from create_bot import *
 from keyboards.keyboards import kb_cancel
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from states.EditingStates import *
 from states.AdminStatus import AdminStatus
+import json
 
 
 async def edit_rate_employee_handler(call: types.CallbackQuery, state: FSMContext):  # Important!!!
     # await remove_chat_buttons(chat_id)
     await EditRate.name_employee.set()
-    await call.message.answer("Введите ФИО сотрудника", reply_markup=types.ReplyKeyboardRemove())
+    await call.message.answer("Введите ФИО сотрудника\nСписок сотрудников - /employees", reply_markup=types.ReplyKeyboardRemove())
     await call.answer()
 
 
 async def name_employee_rate_handler(message: types.Message, state: FSMContext):
     chat_id = message.chat.id
     # await remove_chat_buttons(chat_id)
-    rates = [[1, "Programming - 100%"], [2, "Math - 50%"], [3, "Data engineer - 80%"]]
+
+    name = message.text.strip().split()
+    employees = session.query(Employee).filter_by(firstname=name[0], lastname=name[1]).all()
+    if len(employees) > 0:
+        rates_employee = session.query(Rate).filter_by(id_employee=employees[0].id).all()
+        rates = []
+        for rate_employee in rates_employee:
+            position = session.query(Position).filter_by(id=rate_employee.id_position).first()
+            contract_id = session.query(PosContr).filter_by(id_position=position.id).first().id
+            contract = session.query(Contract).filter_by(id=contract_id).first()
+            if contract.get_status():
+                rates.append([rate_employee.id, f"{position.name} - {rate_employee.rate*100}% ({position.wage * rate_employee.rate} р.)"])
+    else:
+        await bot.send_message(chat_id, "Сотрудник не найден. Введите ФИО сотрудника\n" +
+                               "Список сотрудников - /employees", reply_markup=types.ReplyKeyboardRemove())
+        return
+
+    if len(rates) == 0:
+        await bot.send_message(chat_id, "Сотрудник не имеет активных контрактов. Хотите добавить?", reply_markup=types.ReplyKeyboardRemove())
+        return
+
 
     kb_rates = types.InlineKeyboardMarkup(row_width=1, resize_keyboard=True)
     butts = [types.InlineKeyboardButton(text=rate[1], callback_data=f"edit_rate_{rate[0]}") for rate in rates]
@@ -31,19 +52,47 @@ async def name_employee_rate_handler(message: types.Message, state: FSMContext):
 
 async def position_rate_handler(call: types.CallbackQuery, state: FSMContext):
     chat_id = call.message.chat.id
-    id_rate = call.data.split("_")[-1]
     # await remove_chat_buttons(chat_id)
+
+    with open(data_name_file, "r+") as file:
+        data = json.load(file)
+        id_rate = call.data.split("_")[-1]
+        data[f"{chat_id}_edit_rate"] = {"rate_id": id_rate}
+        file.close()
+    with open(data_name_file, "w") as file:
+        json.dump(data, file, indent=4)
 
     await EditRate.next()
 
     await bot.send_message(chat_id,
-                           f"Ставка {id_rate} выбрана. Введите новую ставку",
+                           f"Введите новую ставку в процентах (целое число)",
                            reply_markup=types.ReplyKeyboardRemove())
 
 
 async def update_rate_handler(message: types.Message, state: FSMContext):
     chat_id = message.chat.id
     # await remove_chat_buttons(chat_id)
+
+    with open(data_name_file, "r+") as file:
+        data = json.load(file)
+        try:
+            data[f"{chat_id}_edit_rate"]["rate"] = int(message.text.strip())/100
+        except Exception as e:
+            await bot.send_message(chat_id, "Ставка введена неверно. Введите новую ставку в процентах (целое число)",
+                                   reply_markup=types.ReplyKeyboardRemove())
+            return
+
+        rate_id = data[f"{chat_id}_edit_rate"]["rate_id"]
+        value = data[f"{chat_id}_edit_rate"]["rate"]
+        rate_employee = session.query(Rate).filter_by(id=rate_id).first()
+        rate_employee.rate = value
+        session.add(rate_employee)
+        session.commit()
+
+        del(data[f"{chat_id}_edit_rate"])
+        file.close()
+    with open(data_name_file, "w") as file:
+        json.dump(data, file, indent=4)
 
     kb_continue = types.InlineKeyboardMarkup(resize_keyboard=True)
     butts = types.InlineKeyboardButton(text="Продолжить", callback_data="del_award")
