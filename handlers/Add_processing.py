@@ -389,7 +389,8 @@ async def number_stuff_position_handler(message: types.Message, state: FSMContex
         try:
             data[f"{chat_id}_add_position"]["num_staff"] = int(message.text.strip())
         except Exception as e:
-            await bot.send_message(chat_id, "Количество человек введено неверно. Введите количество человек, необходимых на этой должности (количество полных ставок)",
+            await bot.send_message(chat_id,
+                                   "Количество человек введено неверно. Введите количество человек, необходимых на этой должности (количество полных ставок)",
                                    reply_markup=types.ReplyKeyboardRemove())
             return
 
@@ -432,7 +433,7 @@ async def add_employee_to_position_handler(call: types.CallbackQuery, state: FSM
     await call.answer()
 
 
-async def name_employee_position_handler(message: types.Message, state: FSMContext):
+async def id_employee_position_handler(message: types.Message, state: FSMContext):
     chat_id = message.chat.id
     # await remove_chat_buttons(chat_id)
 
@@ -456,7 +457,7 @@ async def name_employee_position_handler(message: types.Message, state: FSMConte
                            reply_markup=types.ReplyKeyboardRemove())
 
 
-async def name_contract_employee_handler(message: types.Message, state: FSMContext):
+async def id_contract_employee_handler(message: types.Message, state: FSMContext):
     chat_id = message.chat.id
     # await remove_chat_buttons(chat_id)
 
@@ -465,18 +466,64 @@ async def name_contract_employee_handler(message: types.Message, state: FSMConte
         name = message.text.strip()
         contracts = session.query(Contract).filter_by(name=name).all()
         if len(contracts) > 0:
-            data[f"{chat_id}_add_position_to_employee"] = {"contract_id": contracts[0].id}
+            data[f"{chat_id}_add_position_to_employee"]["contract_id"] = contracts[0].id
         else:
             await bot.send_message(chat_id, "Контракт не найден. Введите название контракта\n" +
                                    "Список контрактов - /contracts", reply_markup=types.ReplyKeyboardRemove())
             return
 
-        vacancy = [[1, "Programming - 2"], [2, "Math - 1"], [3, "Data engineer - 1"]]
-        # vacancy = session.query(PosContr).filter_by(id_contract=contracts[0].id)
+        # vacancy = [[1, "Programming - 2"], [2, "Math - 1"], [3, "Data engineer - 1"]]
+        positions_of_contracts = session.query(PosContr).filter_by(id_contract=contracts[0].id).all()
+
+        if len(positions_of_contracts) == 0:
+            del (data[f"{chat_id}_add_position"])
+            file.close()
+
+            kb_continue = types.InlineKeyboardMarkup(resize_keyboard=True)
+            butts = types.InlineKeyboardButton(text="Добавить", callback_data="add_position")
+            kb_continue.add(butts)
+
+            await bot.send_message(chat_id,
+                                   "У этого контракта нет должностей. Сначала добавьте их, чтобы назначить сотрудника." +
+                                   "\nМеню - /start_menu" +
+                                   "\nМеню добавления - /add_menu" +
+                                   "\nМеню удаления - /del_menu" +
+                                   "\nМеню изменения - /upd_menu" +
+                                   "\nМеню запросов - /gen_menu\n\nВыйти - /exit",
+                                   reply_markup=kb_continue)
+            return
 
         file.close()
     with open(data_name_file, "w") as file:
         json.dump(data, file, indent=4)
+
+    vacancy = []
+    for p_c in positions_of_contracts:
+        position = session.query(Position).filter_by(id=p_c.id_position).first()
+        count = position.staff_num * 1.5
+        rates_employees = session.query(Rate).filter_by(id_position=p_c.id_position).all()
+        for rate_employee in rates_employees:
+            count -= rate_employee.rate
+        vacancy.append([position.id, f"{position.name} - {count*100}%"])
+
+    if len(vacancy) == 0:
+            del (data[f"{chat_id}_add_position"])
+            file.close()
+
+            kb_continue = types.InlineKeyboardMarkup(resize_keyboard=True)
+            butts = types.InlineKeyboardButton(text="Добавить", callback_data="add_position")
+            kb_continue.add(butts)
+
+            await bot.send_message(chat_id,
+                                   "У этого контракта нет свободных должностей. Хотите добавить должность?" +
+                                   "\nМеню - /start_menu" +
+                                   "\nМеню добавления - /add_menu" +
+                                   "\nМеню удаления - /del_menu" +
+                                   "\nМеню изменения - /upd_menu" +
+                                   "\nМеню запросов - /gen_menu\n\nВыйти - /exit",
+                                   reply_markup=kb_continue)
+            return
+
 
     kb_vacancies = types.InlineKeyboardMarkup(row_width=1, resize_keyboard=True)
     butts = [types.InlineKeyboardButton(text=rate[1], callback_data=f"add_position_{rate[0]}") for rate in vacancy]
@@ -484,23 +531,79 @@ async def name_contract_employee_handler(message: types.Message, state: FSMConte
 
     await AddEmployeeToContract.next()
 
-    await bot.send_message(chat_id, "Введите позицию для сотруднику",
+    await bot.send_message(chat_id, "Выберите позицию для сотрудника (справа остаток процентов от базовой ставки; max - 150%)",
                            reply_markup=kb_vacancies)
 
 
-async def name_position_to_employee_handler(call: types.CallbackQuery, state: FSMContext):
+async def id_position_to_employee_handler(call: types.CallbackQuery, state: FSMContext):
     chat_id = call.message.chat.id
     # await remove_chat_buttons(chat_id)
 
+    with open(data_name_file, "r+") as file:
+        data = json.load(file)
+        data[f"{chat_id}_add_position_to_employee"]["position_id"] = call.data.split("_")[-1]
+
+        file.close()
+    with open(data_name_file, "w") as file:
+        json.dump(data, file, indent=4)
+
     await AddEmployeeToContract.next()
 
-    await bot.send_message(chat_id, "Введите ставку сотрудника",
+    await call.message.answer("Введите ставку сотрудника в процентах так, что суммарно ставки всех сотрудников на этой должности не будут превышать 150%",
                            reply_markup=types.ReplyKeyboardRemove())
+    await call.answer()
 
 
 async def wage_employee_position_handler(message: types.Message, state: FSMContext):
     chat_id = message.chat.id
     # await remove_chat_buttons(chat_id)
+
+    with open(data_name_file, "r+") as file:
+        data = json.load(file)
+
+        position = session.query(Position).filter_by(id=data[f"{chat_id}_add_position_to_employee"]["position_id"]).first()
+        count = position.staff_num * 1.5
+        rates_employees = session.query(Rate).filter_by(id_position=position.id).all()
+        for rate_employee in rates_employees:
+            count -= rate_employee.rate
+        if count < 0:
+            await bot.send_message(chat_id,
+                                   "лишком большая ставка. Введите ставку сотрудника в процентах так, что суммарно ставки всех сотрудников на этой должности не будут превышать 150%",
+                                   reply_markup=types.ReplyKeyboardRemove())
+            return
+
+        rates_employees = session.query(Rate).filter_by(id_employee=data[f"{chat_id}_add_position_to_employee"]["employee_id"]).all()
+        count = 1.5
+        for rate_employee in rates_employees:
+            contract_id = session.query(PosContr).filter_by(id_position=rate_employee.id_position).first().id
+            type_contract = session.query(Contract).filter_by(id=contract_id).first().type
+            if type_contract.name == "main":
+                count -= rate_employee.rate
+        if count < 0:
+            await bot.send_message(chat_id,
+                                   "Слишком большая ставка. Введите ставку сотрудника в процентах так, что суммарно ставки по всем основным контрактам не превышали 150%",
+                                   reply_markup=types.ReplyKeyboardRemove())
+            return
+
+        try:
+            data[f"{chat_id}_add_position_to_employee"]["rate"] = int(message.text.strip())/100
+        except Exception as e:
+            await bot.send_message(chat_id,
+                                   "Ставка введена неверно. Введите ставку сотрудника в процентах (целое число)",
+                                   reply_markup=types.ReplyKeyboardRemove())
+            return
+
+        employee_id = data[f"{chat_id}_add_position_to_employee"]["employee_id"]
+        position_id = data[f"{chat_id}_add_position_to_employee"]["position_id"]
+        rate_employee = data[f"{chat_id}_add_position_to_employee"]["rate"]
+        rate = Rate(id_employee=employee_id, id_position=position_id, rate=rate_employee)
+        session.add(rate)
+        session.commit()
+
+        del (data[f"{chat_id}_add_position_to_employee"])
+        file.close()
+    with open(data_name_file, "w") as file:
+        json.dump(data, file, indent=4)
 
     kb_continue = types.InlineKeyboardMarkup(resize_keyboard=True)
     butts = types.InlineKeyboardButton(text="Продолжить", callback_data="add_position")
@@ -639,9 +742,9 @@ def register_handlers_add(dp: Dispatcher):
     dp.register_callback_query_handler(add_employee_to_position_handler,
                                        lambda call: call.data == "add_contract_to_employee",
                                        state=AdminStatus.authorized)
-    dp.register_message_handler(name_employee_position_handler, state=AddEmployeeToContract.id_employee)
-    dp.register_message_handler(name_contract_employee_handler, state=AddEmployeeToContract.id_contract)
-    dp.register_callback_query_handler(name_position_to_employee_handler, state=AddEmployeeToContract.position)
+    dp.register_message_handler(id_employee_position_handler, state=AddEmployeeToContract.id_employee)
+    dp.register_message_handler(id_contract_employee_handler, state=AddEmployeeToContract.id_contract)
+    dp.register_callback_query_handler(id_position_to_employee_handler, state=AddEmployeeToContract.position)
     dp.register_message_handler(wage_employee_position_handler, state=AddEmployeeToContract.rate)
 
     dp.register_callback_query_handler(add_award_handler, lambda call: call.data == "add_award",
