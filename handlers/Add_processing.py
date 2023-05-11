@@ -504,26 +504,25 @@ async def id_contract_employee_handler(message: types.Message, state: FSMContext
         rates_employees = session.query(Rate).filter_by(id_position=p_c.id_position).all()
         for rate_employee in rates_employees:
             count -= rate_employee.rate
-        vacancy.append([position.id, f"{position.name} - {count*100}%"])
+        vacancy.append([position.id, f"{position.name} - {count * 100}%"])
 
     if len(vacancy) == 0:
-            del (data[f"{chat_id}_add_position"])
-            file.close()
+        del (data[f"{chat_id}_add_position"])
+        file.close()
 
-            kb_continue = types.InlineKeyboardMarkup(resize_keyboard=True)
-            butts = types.InlineKeyboardButton(text="Добавить", callback_data="add_position")
-            kb_continue.add(butts)
+        kb_continue = types.InlineKeyboardMarkup(resize_keyboard=True)
+        butts = types.InlineKeyboardButton(text="Добавить", callback_data="add_position")
+        kb_continue.add(butts)
 
-            await bot.send_message(chat_id,
-                                   "У этого контракта нет свободных должностей. Хотите добавить должность?" +
-                                   "\nМеню - /start_menu" +
-                                   "\nМеню добавления - /add_menu" +
-                                   "\nМеню удаления - /del_menu" +
-                                   "\nМеню изменения - /upd_menu" +
-                                   "\nМеню запросов - /gen_menu\n\nВыйти - /exit",
-                                   reply_markup=kb_continue)
-            return
-
+        await bot.send_message(chat_id,
+                               "У этого контракта нет свободных должностей. Хотите добавить должность?" +
+                               "\nМеню - /start_menu" +
+                               "\nМеню добавления - /add_menu" +
+                               "\nМеню удаления - /del_menu" +
+                               "\nМеню изменения - /upd_menu" +
+                               "\nМеню запросов - /gen_menu\n\nВыйти - /exit",
+                               reply_markup=kb_continue)
+        return
 
     kb_vacancies = types.InlineKeyboardMarkup(row_width=1, resize_keyboard=True)
     butts = [types.InlineKeyboardButton(text=rate[1], callback_data=f"add_position_{rate[0]}") for rate in vacancy]
@@ -531,7 +530,8 @@ async def id_contract_employee_handler(message: types.Message, state: FSMContext
 
     await AddEmployeeToContract.next()
 
-    await bot.send_message(chat_id, "Выберите позицию для сотрудника (справа остаток процентов от базовой ставки; max - 150%)",
+    await bot.send_message(chat_id,
+                           "Выберите позицию для сотрудника (справа остаток процентов от базовой ставки; max - 150%)",
                            reply_markup=kb_vacancies)
 
 
@@ -549,8 +549,9 @@ async def id_position_to_employee_handler(call: types.CallbackQuery, state: FSMC
 
     await AddEmployeeToContract.next()
 
-    await call.message.answer("Введите ставку сотрудника в процентах так, что суммарно ставки всех сотрудников на этой должности не будут превышать 150%",
-                           reply_markup=types.ReplyKeyboardRemove())
+    await call.message.answer(
+        "Введите ставку сотрудника в процентах так, что суммарно ставки всех сотрудников на этой должности не будут превышать 150%",
+        reply_markup=types.ReplyKeyboardRemove())
     await call.answer()
 
 
@@ -561,7 +562,8 @@ async def wage_employee_position_handler(message: types.Message, state: FSMConte
     with open(data_name_file, "r+") as file:
         data = json.load(file)
 
-        position = session.query(Position).filter_by(id=data[f"{chat_id}_add_position_to_employee"]["position_id"]).first()
+        position = session.query(Position).filter_by(
+            id=data[f"{chat_id}_add_position_to_employee"]["position_id"]).first()
         count = position.staff_num * 1.5
         rates_employees = session.query(Rate).filter_by(id_position=position.id).all()
         for rate_employee in rates_employees:
@@ -572,7 +574,8 @@ async def wage_employee_position_handler(message: types.Message, state: FSMConte
                                    reply_markup=types.ReplyKeyboardRemove())
             return
 
-        rates_employees = session.query(Rate).filter_by(id_employee=data[f"{chat_id}_add_position_to_employee"]["employee_id"]).all()
+        rates_employees = session.query(Rate).filter_by(
+            id_employee=data[f"{chat_id}_add_position_to_employee"]["employee_id"]).all()
         count = 1.5
         for rate_employee in rates_employees:
             contract_id = session.query(PosContr).filter_by(id_position=rate_employee.id_position).first().id
@@ -586,7 +589,7 @@ async def wage_employee_position_handler(message: types.Message, state: FSMConte
             return
 
         try:
-            data[f"{chat_id}_add_position_to_employee"]["rate"] = int(message.text.strip())/100
+            data[f"{chat_id}_add_position_to_employee"]["rate"] = int(message.text.strip()) / 100
         except Exception as e:
             await bot.send_message(chat_id,
                                    "Ставка введена неверно. Введите ставку сотрудника в процентах (целое число)",
@@ -634,9 +637,21 @@ async def type_award_handler(message: types.Message, state: FSMContext):
     chat_id = message.chat.id
     # await remove_chat_buttons(chat_id)
 
+    with open(data_name_file, "r+") as file:
+        data = json.load(file)
+        if message.text.strip().lower() == "поощрение":
+            data[f"{chat_id}_add_award"] = {"type": True}
+        else:
+            data[f"{chat_id}_add_award"] = {"type": False}
+
+        file.close()
+    with open(data_name_file, "w") as file:
+        json.dump(data, file, indent=4)
+
     await AddAward.next()
 
-    await bot.send_message(chat_id, f"Введите описание {'поощрения' if True else 'штрафа'}",
+    await bot.send_message(chat_id,
+                           f"Введите название {'поощрения' if data[f'{chat_id}_add_award']['type'] else 'штрафа'}",
                            reply_markup=types.ReplyKeyboardRemove())
 
 
@@ -644,15 +659,46 @@ async def name_award_handler(message: types.Message, state: FSMContext):
     chat_id = message.chat.id
     # await remove_chat_buttons(chat_id)
 
+    with open(data_name_file, "r+") as file:
+        data = json.load(file)
+        data[f'{chat_id}_add_award']['name'] = message.text.strip()
+
+        file.close()
+    with open(data_name_file, "w") as file:
+        json.dump(data, file, indent=4)
+
     await AddAward.next()
 
-    await bot.send_message(chat_id, f"Введите сумму {'поощрения' if True else 'штрафа'}",
+    await bot.send_message(chat_id,
+                           f"Введите сумму {'поощрения' if data[f'{chat_id}_add_award']['type'] else 'штрафа'} (в рублях)",
                            reply_markup=types.ReplyKeyboardRemove())
 
 
 async def award_cost_handler(message: types.Message, state: FSMContext):
     chat_id = message.chat.id
     # await remove_chat_buttons(chat_id)
+
+    with open(data_name_file, "r+") as file:
+        data = json.load(file)
+        try:
+            data[f"{chat_id}_add_award"]["cost"] = float(message.text.strip())
+        except Exception as e:
+            await bot.send_message(chat_id,
+                                   f"Сумма введена неверно. Введите сумму {'поощрения' if data[f'{chat_id}_add_award']['type'] else 'штрафа'} (число, разделитель точка)",
+                                   reply_markup=types.ReplyKeyboardRemove())
+            return
+
+        type_award = AwardTypes.award if data[f"{chat_id}_add_award"]["type"] else AwardTypes.penalty
+        name = data[f"{chat_id}_add_award"]["name"]
+        cost = data[f"{chat_id}_add_award"]["cost"]
+        award = Award(name=name, type=type_award, cost=cost)
+        session.add(award)
+        session.commit()
+
+        del (data[f"{chat_id}_add_award"])
+        file.close()
+    with open(data_name_file, "w") as file:
+        json.dump(data, file, indent=4)
 
     kb_continue = types.InlineKeyboardMarkup(resize_keyboard=True)
     butts = types.InlineKeyboardButton(text="Продолжить", callback_data="add_award")
@@ -668,28 +714,57 @@ async def award_cost_handler(message: types.Message, state: FSMContext):
 async def add_award_to_employee_handler(call: types.CallbackQuery, state: FSMContext):
     # await remove_chat_buttons(chat_id)
     await AddAwardToEmployee.id_employee.set()
-    await call.message.answer(f"Введите ФИО сотрудника\n{'список сотрудников'}",
+    await call.message.answer(f"Введите ФИО сотрудника\nСписок сотрудников - /employees",
                               reply_markup=types.ReplyKeyboardRemove())
     await call.answer()
 
 
-async def name_employee_to_award_handler(message: types.Message, state: FSMContext):
+async def id_employee_to_award_handler(message: types.Message, state: FSMContext):
     chat_id = message.chat.id
     # await remove_chat_buttons(chat_id)
 
+    with open(data_name_file, "r+") as file:
+        data = json.load(file)
+        name = message.text.strip().split()
+        employees = session.query(Employee).filter_by(firstname=name[0], lastname=name[1]).all()
+        if len(employees) > 0:
+            data[f"{chat_id}_add_award_to_employee"] = {"employee_id": employees[0].id}
+        else:
+            await bot.send_message(chat_id, "Сотрудник не найден. Введите ФИО сотрудника\n" +
+                                   "Список сотрудников - /employees", reply_markup=types.ReplyKeyboardRemove())
+            return
+        file.close()
+    with open(data_name_file, "w") as file:
+        json.dump(data, file, indent=4)
+
     await AddAwardToEmployee.next()
 
-    await bot.send_message(chat_id, f"Введите название поощрения/штрафа\n{'список поощрений/штрафов'}",
+    await bot.send_message(chat_id, f"Введите название поощрения/штрафа\nСписок поощрений/штрафов - /awards",
                            reply_markup=types.ReplyKeyboardRemove())
 
 
-async def name_award_handler(message: types.Message, state: FSMContext):
+async def id_award_of_employee_handler(message: types.Message, state: FSMContext):
     chat_id = message.chat.id
     # await remove_chat_buttons(chat_id)
 
+    with open(data_name_file, "r+") as file:
+        data = json.load(file)
+        name = message.text.strip()
+        awards = session.query(Award).filter_by(name=name).all()
+        if len(awards) > 0:
+            data[f"{chat_id}_add_award_to_employee"]["award_id"] = awards[0].id
+        else:
+            await bot.send_message(chat_id, "Поощрение/штраф не найдено. Введите название поощрения/штрафа\n" +
+                                   "Список сотрудников - /awards", reply_markup=types.ReplyKeyboardRemove())
+            return
+        file.close()
+    with open(data_name_file, "w") as file:
+        json.dump(data, file, indent=4)
+
     await AddAwardToEmployee.next()
 
-    await bot.send_message(chat_id, "Введите дату назначения поощрения/штрафа",
+    await bot.send_message(chat_id,
+                           f"Введите дату назначения {'поощрения' if awards[0].type.name == 'award' else 'штрафа'}",
                            reply_markup=types.ReplyKeyboardRemove())
 
 
@@ -697,19 +772,51 @@ async def date_award_handler(message: types.Message, state: FSMContext):
     chat_id = message.chat.id
     # await remove_chat_buttons(chat_id)
 
-    kb_continue = types.InlineKeyboardMarkup(resize_keyboard=True)
-    butts = types.InlineKeyboardButton(text="Продолжить", callback_data="add_award_to_employee")
-    kb_continue.add(butts)
+    if check_date(message.text.strip()):
+        with open(data_name_file, "r+") as file:
+            data = json.load(file)
+            date = list(map(int, message.text.split('.')))
 
-    await state.finish()
-    await AdminStatus.authorized.set()
+            employee = session.query(Employee).filter_by(id=data[f"{chat_id}_add_award_to_employee"]["employee_id"]).first()
+            award = session.query(Award).filter_by(id=data[f"{chat_id}_add_award_to_employee"]["award_id"]).first()
+            difference_date = dif_date(employee.date_hired, datetime.date(date[2], date[1], date[0]))
+            if difference_date[0] < 0 or difference_date[0] < 0 or difference_date[0] < 0:
+                await bot.send_message(chat_id,
+                                       f"Дата введена не правильно. Сотрудник ещё не был нанят в это время. Введите дату {'поощрения' if award.type.name == 'award' else 'штрафа'}",
+                                       reply_markup=types.ReplyKeyboardRemove())
+                return
 
-    await bot.send_message(chat_id,
-                           "Принято. Хотите назначить ещё одно поощрение/штраф сотруднику?\nМеню - /start_menu" +
-                           "\nМеню добавления - /add_menu" +
-                           "\nМеню удаления - /del_menu" +
-                           "\nМеню изменения - /upd_menu" +
-                           "\nМеню запросов - /gen_menu\n\nВыйти - /exit", reply_markup=kb_continue)
+            data[f"{chat_id}_add_award_to_employee"]["date"] = date
+
+            employee_id = data[f"{chat_id}_add_award_to_employee"]["employee_id"]
+            award_id = data[f"{chat_id}_add_award_to_employee"]["award_id"]
+            date = data[f"{chat_id}_add_award_to_employee"]["date"]
+            date = datetime.date(date[2], date[1], date[0])
+            award_event = AwardEvent(id_employee=employee_id, id_award=award_id, date=date)
+            session.add(award_event)
+            session.commit()
+
+            del (data[f"{chat_id}_add_award_to_employee"])
+            file.close()
+        with open(data_name_file, "w") as file:
+            json.dump(data, file, indent=4)
+
+        kb_continue = types.InlineKeyboardMarkup(resize_keyboard=True)
+        butts = types.InlineKeyboardButton(text="Продолжить", callback_data="add_award_to_employee")
+        kb_continue.add(butts)
+
+        await state.finish()
+        await AdminStatus.authorized.set()
+
+        await bot.send_message(chat_id,
+                               "Принято. Хотите назначить ещё одно поощрение/штраф сотруднику?\nМеню - /start_menu" +
+                               "\nМеню добавления - /add_menu" +
+                               "\nМеню удаления - /del_menu" +
+                               "\nМеню изменения - /upd_menu" +
+                               "\nМеню запросов - /gen_menu\n\nВыйти - /exit", reply_markup=kb_continue)
+    else:
+        await bot.send_message(chat_id, f"Дата введена не правильно. {date_rules()}Введите дату начала контракта",
+                               reply_markup=types.ReplyKeyboardRemove())
 
 
 def register_handlers_add(dp: Dispatcher):
@@ -755,6 +862,6 @@ def register_handlers_add(dp: Dispatcher):
 
     dp.register_callback_query_handler(add_award_to_employee_handler, lambda call: call.data == "add_award_to_employee",
                                        state=AdminStatus.authorized)
-    dp.register_message_handler(name_employee_to_award_handler, state=AddAwardToEmployee.id_employee)
-    dp.register_message_handler(name_award_handler, state=AddAwardToEmployee.id_award)
+    dp.register_message_handler(id_employee_to_award_handler, state=AddAwardToEmployee.id_employee)
+    dp.register_message_handler(id_award_of_employee_handler, state=AddAwardToEmployee.id_award)
     dp.register_message_handler(date_award_handler, state=AddAwardToEmployee.date)

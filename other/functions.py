@@ -35,17 +35,18 @@ def dif_date(date1, date2):
 
 def generate_employee_list(employees):
     if len(employees) > 0:
-        return "Список сотрудников:\n" + "\n".join([e.firstname + " " + e.lastname if e.middlename is None
-                                                    else e.firstname + " " + e.lastname + " " + e.middlename for e in
-                                                    employees])
+        return "Список сотрудников:\n" + "\n".join([f"{e.firstname} {e.lastname} {'' if e.middlename is None else e.middlename}, стаж - {e.getExperience_to_str()}" for e in employees])
     else:
         return "Пусто."
 
 
 def generate_award_list(awards):
     if len(awards) > 0:
-        return "Список поощрений/штрафов:\n" + "\n".join(
-            [a.name + " - " + a.type + " = " + a.cost for a in awards])
+        text = "Список поощрений:\n" + "\n".join(
+            [f"{a.name} - {a.cost} р." for a in sorted(list(filter(lambda x: x.type.name == 'award', awards)), key=lambda x: x.name)])
+        text += "\n\nСписок штрафов:\n" + "\n".join(
+            [f"{a.name} - {a.cost} р." for a in sorted(list(filter(lambda x: x.type.name == 'penalty', awards)), key=lambda x: x.name)])
+        return text
     else:
         return "Пусто."
 

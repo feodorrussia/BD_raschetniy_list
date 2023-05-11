@@ -46,10 +46,10 @@ class Employee(Basic):
         exp[1] += - 1 if exp[2] < 0 else 0
         exp[0] += -1 if exp[1] < 0 else 0
         exp[1] = (12 + exp[1]) % 12
-        exp[2] = (date - datetime.date(date.year - (0 if 12 > date.month - 1 > 0 else 1), (12 + date.month - 1) % 12,
+        exp[2] = (date - datetime.date(date.year - (0 if 12 > date.month - 1 > 0 else 1), (12 + date.month - 2) % 12 + 1,
                                        self.date_hired.day)).days
 
-        return f"{'years: ' + str(exp[0]) + ' ' if exp[0] > 0 else ''}{'months: ' + str(exp[1]) + ' ' if exp[1] > 0 or exp[0] > 0 else ''}{'days: ' + str(exp[2]) if exp[2] > 0 or exp[1] > 0 or exp[0] > 0 else 'None'}"
+        return f"{str(exp[0]) + ' years,' + ' ' if exp[0] > 0 else ''}{str(exp[1]) + ' months,' + ' ' if exp[1] > 0 or exp[0] > 0 else ''}{str(exp[2]) + ' days' if exp[2] > 0 or exp[1] > 0 or exp[0] > 0 else 'None'}"
 
     def info(self):
         return f"Name: {self.firstname} {self.lastname}{' ' + self.middlename if self.middlename is not None and self.middlename != '' else ''}, {self.gender}, hired - {self.date_hired}{' - fired' + str(self.date_fired) if self.date_fired is not None else ''}, experience: {self.getExperience_to_str()}"
