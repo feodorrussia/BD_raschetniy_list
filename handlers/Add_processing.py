@@ -257,11 +257,22 @@ async def start_contract_date_handler(message: types.Message, state: FSMContext)
                                reply_markup=types.ReplyKeyboardRemove())
 
 
+def check_for_contract(date):
+    try:
+        date = list(map(int, date.strip().split(".")))
+    except Exception as e:
+        return False
+    date_now = datetime.date.today()
+    if len(date) == 3:
+        return True
+    return False
+
+
 async def end_contract_date_handler(message: types.Message, state: FSMContext):
     chat_id = message.chat.id
     # await remove_chat_buttons(chat_id)
 
-    if check_date(message.text.strip()):
+    if check_for_contract(message.text.strip()):
         with open(data_name_file, "r+") as file:
             data = json.load(file)
             date = list(map(int, message.text.split('.')))
@@ -310,7 +321,7 @@ async def end_contract_date_handler(message: types.Message, state: FSMContext):
 async def add_position_handler(call: types.CallbackQuery, state: FSMContext):
     # await remove_chat_buttons(chat_id)
     await AddPosition.id_contract.set()
-    await call.message.answer("Введите контракт этой должности", reply_markup=types.ReplyKeyboardRemove())
+    await call.message.answer("Введите контракт этой должности\nСписок контрактов - /contracts", reply_markup=types.ReplyKeyboardRemove())
     await call.answer()
 
 

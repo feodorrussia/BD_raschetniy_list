@@ -118,13 +118,13 @@ class Contract(Basic):
     start_date = Column(Date, default=datetime.datetime.today().date())
     end_date = Column(Date, nullable=False)
     type = Column(Enum(ContractTypes), nullable=False, default=ContractTypes.addition)
-    name = Column(String(250), default=None)
+    name = Column(String(250), nullable=False)
 
     def get_status(self):
-        return ((self.end_date - self.start_date) if self.end_date is not None else (datetime.datetime.today().date() - self.start_date)).days > 0
+        return (self.end_date - datetime.datetime.today().date()).days > 0
 
     def info(self):
-        return f"starts {self.start_date} - ends {self.end_date}{'; description: ' + self.name if self.name is not None else ''}"
+        return f"starts {self.start_date} - ends {self.end_date}{'; name: ' + self.name if self.name is not None else ''}"
 
 
 class AwardEvent(Basic):
