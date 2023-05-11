@@ -8,9 +8,25 @@ from states.AdminStatus import AdminStatus
 from other.functions import *
 
 
+def list_vacancies_func():
+    result = ["Программист - 2 x 10 000", "Инженер - 3 x 10 000"]
+    positions = session.query(Position).all()
+    for position in positions:
+        contract_id = session.query(PosContr).filter_by(id_position=position.id).first().id_contract
+        contract = session.query(Contract).filter_by(id=contract_id).first()
+        if contract.get_status():
+            count = 1.5
+            rates_employees = session.query(Rate).filter_by(id_position=position.id)
+            for rate_position in list(filter(lambda x: x.id_position == position.id, rates_employees)):
+                count -= rate_position.rate
+            if count > 0:
+                result.append(f"{position.name} - {count*position.staff_num*100}% x {position.wage} р.")
+    return result
+
+
 async def generate_list_vacancy_handler(call: types.CallbackQuery, state: FSMContext):
     # await remove_chat_buttons(chat_id)
-    list_vacancies = ["Программист - 2 x 10 000", "Инженер - 3 x 10 000"]
+    list_vacancies = list_vacancies_func()
 
     kb_doc = types.InlineKeyboardMarkup(resize_keyboard=True)
     butt = types.InlineKeyboardButton(text="Файл", callback_data="gen_doc_vac")
@@ -32,7 +48,7 @@ async def generate_list_vacancy_doc_handler(call: types.CallbackQuery, state: FS
     chat_id = call.message.chat.id
 
     # await remove_chat_buttons(chat_id)
-    list_vacancies = ["Программист - 2 x 10 000", "Инженер - 3 x 10 000"]
+    list_vacancies = list_vacancies_func()
 
     with open(f"data/vacancy_{hash(chat_id)}.txt", "w") as file:
         file.write("Список вакансий:\n\n" +
@@ -53,17 +69,45 @@ async def generate_list_vacancy_doc_handler(call: types.CallbackQuery, state: FS
     await call.answer()
 
 
+def list_profits():
+    list_vacancies = ["Соломатов Александр Денисович - -1000", "Ушкарёв Савва - -100 000"]
+
+    text ="Итоговый расчётный лист сотрудников:\n\n" + "№ - ФИО сотрудника - Итоговый расчёт за последний месяц:\n"
+    text += "\n".join([str(i + 1) + ". " + list_vacancies[i] for i in range(len(list_vacancies))])
+    text += f"\nИтого: {-101000}"
+
+    return text
+
+
 async def generate_list_profits_handler(call: types.CallbackQuery, state: FSMContext):
     # await remove_chat_buttons(chat_id)
 
     chat_id = call.message.chat.id
     # await remove_chat_buttons(chat_id)
-    list_vacancies = ["Соломатов Александр Денисович - -1000", "Ушкарёв Савва - -100 000"]
+
+    kb_doc = types.InlineKeyboardMarkup(resize_keyboard=True)
+    butt = types.InlineKeyboardButton(text="Файл", callback_data="gen_doc_list_profits")
+    kb_doc.add(butt)
+
+    await bot.send_message(call.message.chat.id, list_profits(), reply_markup=kb_doc)
+
+    await call.message.answer("Ваш расчётный лист\n\nМеню - /start_menu" +
+                              "\nМеню добавления - /add_menu" +
+                              "\nМеню удаления - /del_menu" +
+                              "\nМеню изменения - /upd_menu" +
+                              "\nМеню запросов - /gen_menu\n\nВыйти - /exit", reply_markup=types.ReplyKeyboardRemove())
+
+    await call.answer()
+
+
+async def generate_doc_list_profits_handler(call: types.CallbackQuery, state: FSMContext):
+    # await remove_chat_buttons(chat_id)
+
+    chat_id = call.message.chat.id
+    # await remove_chat_buttons(chat_id)
 
     with open(f"data/profits_{hash(chat_id)}.txt", "w") as file:
-        file.write("Итоговый расчётный лист сотрудников:\n\n" +
-                   "№ - ФИО сотрудника - Итоговый расчёт за последний месяц:\n" +
-                   "\n".join([str(i + 1) + ". " + list_vacancies[i] for i in range(len(list_vacancies))]))
+        file.write(list_profits())
         file.close()
 
     with open(f"data/profits_{hash(chat_id)}.txt", "rb") as file:
@@ -75,26 +119,78 @@ async def generate_list_profits_handler(call: types.CallbackQuery, state: FSMCon
                               "\nМеню удаления - /del_menu" +
                               "\nМеню изменения - /upd_menu" +
                               "\nМеню запросов - /gen_menu\n\nВыйти - /exit", reply_markup=types.ReplyKeyboardRemove())
-
     await call.answer()
+
+
+def warnings_list():
+    list_employees = ["Соломатов Александр Денисович", "Ушкарёв Савва"]
+
+    text = "Итоговый расчёт за месяц меньше нуля у следующих сотрудников:\n\n"
+    text += "\n".join([str(i + 1) + ". " + list_employees[i] for i in range(len(list_employees))])
+
+    text = "Не продлён основной контракт и сотрудник не уволен!\n\n"
+    text += "\n".join([str(i + 1) + ". " + list_employees[i] for i in range(len(list_employees))])
+
+    return text
 
 
 async def generate_list_warning_handler(call: types.CallbackQuery, state: FSMContext):
     # await remove_chat_buttons(chat_id)
     # await GenerateWarning.name_employee.set()
 
-    list_employees = ["Соломатов Александр Денисович", "Ушкарёв Савва"]
+    kb_doc = types.InlineKeyboardMarkup(resize_keyboard=True)
+    butt = types.InlineKeyboardButton(text="Файл", callback_data="gen_doc_list_profits")
+    kb_doc.add(butt)
 
-    await call.message.answer(
-        "Итоговый расчёт за месяц меньше нуля у следующих сотрудников:\n\n{}".format(
-            "\n".join([str(i + 1) + ". " + list_employees[i] for i in range(len(list_employees))])) +
-        "\n\nМеню - /start_menu" +
+    await call.message.answer(warnings_list(), reply_markup=kb_doc)
+
+    await call.message.answer("\n\nМеню - /start_menu" +
         "\nМеню добавления - /add_menu" +
         "\nМеню удаления - /del_menu" +
         "\nМеню изменения - /upd_menu" +
         "\nМеню запросов - /gen_menu\n\nВыйти - /exit",
         reply_markup=types.ReplyKeyboardRemove())
     await call.answer()
+
+
+async def generate_doc_warning_list_handler(call: types.CallbackQuery, state: FSMContext):
+    # await remove_chat_buttons(chat_id)
+
+    chat_id = call.message.chat.id
+    # await remove_chat_buttons(chat_id)
+
+    with open(f"data/warnings_{hash(chat_id)}.txt", "w") as file:
+        file.write(warnings_list())
+        file.close()
+
+    with open(f"data/warnings_{hash(chat_id)}.txt", "rb") as file:
+        await bot.send_document(chat_id, file)
+        file.close()
+
+    await call.message.answer("Ваш файл с предупреждениями\n\nМеню - /start_menu" +
+                              "\nМеню добавления - /add_menu" +
+                              "\nМеню удаления - /del_menu" +
+                              "\nМеню изменения - /upd_menu" +
+                              "\nМеню запросов - /gen_menu\n\nВыйти - /exit", reply_markup=types.ReplyKeyboardRemove())
+
+    await call.answer()
+
+
+def employee_profit_list(employee_id):
+    list_pays = [["Соломатов Александр Денисович", -1000], ["Щтраф", "Опоздание", -1000], ["Поощрение", "Жив", 0]]
+
+    text = f"Расчётный лист\nФИО: {list_pays[0][0]}\n"
+    text += "\n---------------------\n\t Контракты\n\t Название, Тип - ставка х ЗП = оплата\n---------------------\n\n"
+    text += "\n".join([str(i + 1) + ". " + " - ".join(list(map(lambda x: str(x), list_pays[i]))) for i in range(1, len(list_pays))])
+    text += "\n\n---------------------\n\t Поощрения\n\t Название, Тип = счёт\n---------------------\n\n"
+    text += "\n".join([str(i + 1) + ". " + " - ".join(list(map(lambda x: str(x), list_pays[i]))) for i in range(1, len(list_pays))])
+    text += "\n\n---------------------\n\t Штрафы\n\t Название, Тип = счёт\n---------------------\n\n"
+    text += "\n".join([str(i + 1) + ". " + " - ".join(list(map(lambda x: str(x), list_pays[i]))) for i in range(1, len(list_pays))])
+    text += "\n\n---------------------\n\t Налоги и вычет\n---------------------\n\n"
+    text += "\n".join([str(i + 1) + ". " + " - ".join(list(map(lambda x: str(x), list_pays[i]))) for i in range(1, len(list_pays))])
+    text += f"\nИтого: {list_pays[0][1]}"
+
+    return text
 
 
 async def generate_list_employee_profit_handler(call: types.CallbackQuery):
@@ -109,32 +205,40 @@ async def output_list_employee_profit_handler(message: types.Message, state: FSM
     chat_id = message.chat.id
     # await remove_chat_buttons(chat_id)
 
-    list_pays = [["Соломатов Александр Денисович", -1000], ["Щтраф", "Опоздание", -1000], ["Поощрение", "Жив", 0]]
+    kb_doc = types.InlineKeyboardMarkup(resize_keyboard=True)
+    butt = types.InlineKeyboardButton(text="Файл", callback_data="gen_doc_list_profits")
+    kb_doc.add(butt)
 
-    # with open(f"data/profit_{list_pays[0][0]}_{hash(chat_id)}.txt", "w") as file:  # hash(
-    #     text = f"Расчётный лист\nФИО: {list_pays[0][0]}\n\n№ - Название начисления - Итоговый расчёт за полседний месяц:\n"
-    #     text += "\n".join(
-    #         [str(i + 1) + ". " + " - ".join(list(map(lambda x: str(x), list_pays[i]))) for i in range(1, len(list_pays))])
-    #     text += f"\nИтого: {list_pays[0][1]}"
-    #     file.write(text)
-    #     file.close()
+    await bot.send_message(chat_id, employee_profit_list(1), reply_markup=kb_doc)
 
-    text = f"Расчётный лист\nФИО: {list_pays[0][0]}\n\n№ - Название начисления - Итоговый расчёт за полседний месяц:\n"
-    text += "\n".join(
-        [str(i + 1) + ". " + " - ".join(list(map(lambda x: str(x), list_pays[i]))) for i in range(1, len(list_pays))])
-    text += f"\nИтого: {list_pays[0][1]}"
-
-    await bot.send_message(chat_id, text, reply_markup=types.ReplyKeyboardRemove())
-
-    # with open(f"data/profit_{list_pays[0][0]}_{hash(chat_id)}.txt", "rb") as file:  # hash(
-    #     await bot.send_document(chat_id, file)
-    #     file.close()
-
-    await bot.send_message(chat_id, f"Расчётный лист для сотрудника ФИО: {list_pays[0][0]}\n\nМеню - /start_menu" +
+    await bot.send_message(chat_id, f"Меню - /start_menu" +
                            "\nМеню добавления - /add_menu" +
                            "\nМеню удаления - /del_menu" +
                            "\nМеню изменения - /upd_menu" +
                            "\nМеню запросов - /gen_menu\n\nВыйти - /exit", reply_markup=types.ReplyKeyboardRemove())
+
+
+async def generate_doc_employee_profit_handler(call: types.CallbackQuery, state: FSMContext):
+    # await remove_chat_buttons(chat_id)
+
+    chat_id = call.message.chat.id
+    # await remove_chat_buttons(chat_id)
+
+    with open(f"data/employee_profit_{hash(chat_id)}.txt", "w") as file:
+        file.write(employee_profit_list(1))
+        file.close()
+
+    with open(f"data/employee_profit_{hash(chat_id)}.txt", "rb") as file:
+        await bot.send_document(chat_id, file)
+        file.close()
+
+    await call.message.answer("Ваш файл с расчётным листом\n\nМеню - /start_menu" +
+                              "\nМеню добавления - /add_menu" +
+                              "\nМеню удаления - /del_menu" +
+                              "\nМеню изменения - /upd_menu" +
+                              "\nМеню запросов - /gen_menu\n\nВыйти - /exit", reply_markup=types.ReplyKeyboardRemove())
+
+    await call.answer()
 
 
 async def generate_employee_list_handler(call: types.CallbackQuery, state: FSMContext):
